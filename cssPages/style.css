@@ -1,0 +1,300 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+#container{
+    display: flex;
+    height: 100vh;
+}
+    
+#left {
+    width: 50%;
+    background-color: rgb(1, 36, 47);
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;; /* horizontal centering */
+    align-items: center;     /* vertical centering */
+}
+
+#sub-left { 
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    align-items: center;     /* centers vertically */
+    height: 70%;
+    width: 80%;
+    background: linear-gradient( rgb(1, 36, 47),  rgb(0, 96, 125));
+   
+}
+
+#text{
+    text-align: left;
+    color: white; /* optional: makes text visible on dark background */
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+  #right {
+    width: 50%;
+    background-color: rgb(194, 227, 237);
+    padding: 0;
+    height: 100%;
+    display: flex;               /* added */
+    justify-content: flex-start;     /* centers #sub-right horizontally */
+    align-items: center; 
+  }
+
+  #sub-right{
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    align-items: center;     /* centers vertically */
+    height: 70%;
+    width: 80%;
+    background: linear-gradient(  rgb(194, 227, 237) , rgb(217, 221, 222));
+    
+}
+
+
+
+.myForm {
+    width: 330px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f3f3f3;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+
+  .myForm h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .myForm label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .myForm input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+  
+  .myForm button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    margin-top: 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .myForm button:hover {
+    background-color: #0056b3;
+  }
+
+  .myForm:hover {
+    background-color: #e0e0e0; 
+  }
+
+  .myForm input:focus {
+    border: 2px solid #66ccff;  /* light blue border */
+    outline: none;              /* removes default blue glow */
+    background-color: #f0faff;  /* optional: light blue background */
+    transition: border 0.3s ease, background-color 0.3s ease;
+  }
+
+  .myForm p {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 16px;
+    color:#333;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  #left-second {
+    width: 50%;
+    background-color: rgb(194, 227, 237);
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;; /* horizontal centering */
+    align-items: center;     /* vertical centering */
+}
+
+#sub-left-second { 
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    align-items: center;     /* centers vertically */
+    height: 70%;
+    width: 80%;
+    background: linear-gradient(  rgb(194, 227, 237) , rgb(217, 221, 222));
+   
+}
+
+.text-heading{
+    text-align: left;
+    color: white; /* optional: makes text visible on dark background */
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+  #right-second {
+    width: 50%;
+    background-color: rgb(1, 36, 47);
+    padding: 0;
+    height: 100%;
+    display: flex;               /* added */
+    justify-content: flex-start;     /* centers #sub-right horizontally */
+    align-items: center; 
+  }
+
+  #sub-right-second {
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    align-items: center;     /* centers vertically */
+    height: 70%;
+    width: 80%;
+    background: linear-gradient( rgb(1, 36, 47),  rgb(0, 96, 125));
+    
+    
+}
+
+#btn{
+     display: flex;
+    justify-content: flex-end; /* Align items to the right */
+    gap: 10px;
+    padding-right: 190px; 
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* Reset default margin/padding */
+body, main {
+  margin: 0;
+  padding: 0;
+}
+
+/* Header Styling */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgb(44, 62, 80);
+  color: white;
+  padding: 15px 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Navigation Links */
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #f39c12;
+}
+
+/* Main Content Flexbox */
+main > div {
+  display: flex;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#main-left-div, #main-right-div {
+  flex: 1;
+  padding: 0;
+  box-sizing: border-box;
+  margin: 0;            /* Ensure no margin */
+}
+
+#main-right-div {
+  padding-right: 0;     /* Ensure no right padding */
+  padding-top: -0px;
+}
+
+#main-right-div img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#main-left-div{
+   background: linear-gradient(rgb(65, 92, 119), rgb(44, 62, 80));
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+   color: white;
+   padding: 20px;
+}
+
+#main-left-div h1{
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+#main-left-div p{
+  font-size: 1.2rem;
+  max-width: 600px;
+}
+
+.footer {
+  background-color: rgb(65, 92, 119);
+  color: #ecf0f1;
+  padding: 20px 0;
+  font-size: 0.95rem;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 40px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-left, .footer-center, .footer-right {
+  flex: 1;
+  min-width: 250px;
+  margin-bottom: 10px;
+}
+
+.footer h5 {
+  margin-bottom: 10px;
+}
+
+.footer a {
+  color: #ecf0f1;
+  text-decoration: none;
+  margin-right: 15px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+

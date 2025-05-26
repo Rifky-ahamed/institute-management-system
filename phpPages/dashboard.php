@@ -7,10 +7,22 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 include('db_connect.php'); 
-// Fetch total students
-$result = $conn->query("SELECT COUNT(*) AS total_students FROM student");
+// Get current logged-in user's email
+$user_email = $_SESSION['email'];
+$query = "
+    SELECT COUNT(*) AS total_students 
+    FROM student 
+    INNER JOIN users ON student.institute_id = users.id 
+    WHERE users.email = ?
+";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $user_email);
+$stmt->execute();
+$result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $totalStudents = $row['total_students'];
+
+
 
 $activities = [];
 $actResult = $conn->query("SELECT activity FROM activity_log ORDER BY created_at DESC LIMIT 5");

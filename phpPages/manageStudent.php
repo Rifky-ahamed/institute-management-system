@@ -9,31 +9,32 @@ if (!isset($_SESSION['logged_in'])) {
 include('db_connect.php');
 
 // Get current logged-in user's email
-$institute_email = $_SESSION['email'];
+$user_email = $_SESSION['email'];
 
-// Fetch the institute name from `users` table using email
-$query_institute = "SELECT name FROM users WHERE email = ?";
-$stmt = $conn->prepare($query_institute);
-$stmt->bind_param("s", $institute_email);
+// Fetch the user's id (institute_id) from users table using email
+$query_user = "SELECT id FROM users WHERE email = ?";
+$stmt = $conn->prepare($query_user);
+$stmt->bind_param("s", $user_email);
 $stmt->execute();
-$result_institute = $stmt->get_result();
+$result_user = $stmt->get_result();
 
-if ($row_institute = $result_institute->fetch_assoc()) {
-    $institute_name = $row_institute['name'];
-        // === START: Filtering Logic ===
+if ($row_user = $result_user->fetch_assoc()) {
+    $institute_id = $row_user['id'];
+
+    // Filtering inputs
     $search = $_GET['search'] ?? '';
-    $search_hashed = md5($search); // Hash for comparison
     $class = $_GET['class'] ?? '';
     $year = $_GET['year'] ?? '';
 
-    $query_students = "SELECT * FROM student WHERE institute_name = ?";
-    $params = [$institute_name];
-    $types = "s";
+    // Base query to get students by institute_id
+    $query_students = "SELECT * FROM student WHERE institute_id = ?";
+    $params = [$institute_id];
+    $types = "i";
 
     if (!empty($search)) {
         $query_students .= " AND (name LIKE ? OR student_code LIKE ?)";
         $params[] = "%$search%";
-        $params[] = "%$search_hashed%";
+        $params[] = "%$search%";  // no need md5 here for searching student_code
         $types .= "ss";
     }
 
@@ -44,39 +45,35 @@ if ($row_institute = $result_institute->fetch_assoc()) {
     }
 
     if (!empty($year)) {
-    $query_students .= " AND year = ?";
-    $params[] = (int)$year;    // Cast to int just to be safe
-    $types .= "i";  // integer type
-}
- 
-    // Prepare and bind
+        $query_students .= " AND year = ?";
+        $params[] = (int)$year;
+        $types .= "i";
+    }
+
     $stmt_students = $conn->prepare($query_students);
     $stmt_students->bind_param($types, ...$params);
     $stmt_students->execute();
     $result = $stmt_students->get_result();
-    // === END: Filtering Logic ===
 
-
-    
 } else {
-    // If no matching institute found, set $result to false
-    $result = false;
+    $result = false; // No user found
 }
 
+// Delete student
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
     $student_code = $_POST['student_code'];
 
-    $stmt = $conn->prepare("DELETE FROM student WHERE student_code = ?");
-    $stmt->bind_param("s", $student_code);
+    // Make sure to delete only student belonging to the current institute
+    $stmt_del = $conn->prepare("DELETE FROM student WHERE student_code = ? AND institute_id = ?");
+    $stmt_del->bind_param("si", $student_code, $institute_id);
 
-    if ($stmt->execute()) {
-        echo "<script>alert('Student deleted successfully'); window.location.href='".$_SERVER['PHP_SELF']."';</script>";
+    if ($stmt_del->execute()) {
+        echo "<script>alert('Student deleted successfully'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
         exit();
     } else {
         echo "<script>alert('Error deleting student');</script>";
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -225,30 +222,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
       
 <?php
 $counter = 1;
-if (mysqli_num_rows($result) > 0):
-  while ($row = mysqli_fetch_assoc($result)):
+if ($result && $result->num_rows > 0):
+    while ($row = $result->fetch_assoc()):
 ?>
-  <tr>
-    <td><?php echo $counter++; ?></td> 
-    <td><?php echo htmlspecialchars($row['name']); ?></td>
-    <td><?php echo htmlspecialchars($row['email']); ?></td>
-    <td><?php echo htmlspecialchars($row['class']); ?></td>
-    <td><?php echo htmlspecialchars($row['phone']); ?></td>
-   <td>
-  <form method="POST" onsubmit="return confirm('Are you sure you want to delete this student?');">
-    <input type="hidden" name="student_code" value="<?php echo $row['student_code']; ?>">
-    <button type="submit" name="delete_student" style="background-color:#FF6347; color:white; padding:6px 10px; border:none; border-radius:4px;">Delete</button>
-  </form>
-</td>
-
-  </tr>
+      <tr>
+        <td><?php echo $counter++; ?></td>
+        <td><?php echo htmlspecialchars($row['name']); ?></td>
+        <td><?php echo htmlspecialchars($row['email']); ?></td>
+        <td><?php echo htmlspecialchars($row['class']); ?></td>
+        <td><?php echo htmlspecialchars($row['phone']); ?></td>
+        <td>
+          <form method="POST" onsubmit="return confirm('Are you sure you want to delete this student?');">
+            <input type="hidden" name="student_code" value="<?php echo $row['student_code']; ?>">
+            <button type="submit" name="delete_student" style="background-color:#FF6347; color:white; padding:6px 10px; border:none; border-radius:4px;">Delete</button>
+          </form>
+        </td>
+      </tr>
 <?php
-  endwhile;
+    endwhile;
 else:
 ?>
-  <tr>
-    <td colspan="6">No students found.</td>
-  </tr>
+    <tr><td colspan="6">No students found.</td></tr>
 <?php endif; ?>
 </tbody>
   </table>

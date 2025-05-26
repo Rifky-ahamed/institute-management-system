@@ -8,50 +8,52 @@ if (!isset($_SESSION['logged_in'])) {
 
 include('db_connect.php'); 
 
-// Get current user's email from session
-$current_user_email = $_SESSION['email'];
+// Get current logged-in user's email
+$user_email = $_SESSION['email'];
 
-// Use prepared statement to safely fetch user's name from `users` table
-$stmt_user = $conn->prepare("SELECT name FROM users WHERE email = ?");
-$stmt_user->bind_param("s", $current_user_email);
+// Fetch the user's id (institute_id) from users table using email
+$stmt_user = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$stmt_user->bind_param("s", $user_email);
 $stmt_user->execute();
 $result_user = $stmt_user->get_result();
-$row = $result_user->fetch_assoc();
+$row_user = $result_user->fetch_assoc();
 
-$institute = $row ? $row['name'] : "Unknown"; // fallback if not found
+if (!$row_user) {
+    die("Error: User not found.");
+}
+
+$institute_id = $row_user['id'];
 
 $success_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
-    // Sanitize form data
-    $name = mysqli_real_escape_string($conn, $_POST['student_name']);
-    $email = mysqli_real_escape_string($conn, $_POST['student_email']);
-    $phone = mysqli_real_escape_string($conn, $_POST['student_phone']);
-    $class = mysqli_real_escape_string($conn, $_POST['student_class']);
-    $year = mysqli_real_escape_string($conn, $_POST['student_year']);
-    $dob = mysqli_real_escape_string($conn, $_POST['student_dob']);
+    // Sanitize inputs
+    $name = trim($_POST['student_name']);
+    $email = trim($_POST['student_email']);
+    $phone = trim($_POST['student_phone']);
+    $class = trim($_POST['student_class']);
+    $year = intval($_POST['student_year']);
+    $dob = trim($_POST['student_dob']);
     
-   function generateStudentCode() {
-    $unique = substr(md5(microtime(true) . rand()), 0, 8);
-    return strtoupper($unique);
-}
+    function generateStudentCode() {
+        return strtoupper(substr(md5(microtime(true) . rand()), 0, 8));
+    }
 
-    $plain_code = generateStudentCode($name, $email); // Raw password
-    $student_code = md5($plain_code); // Encrypted code
+    $plain_code = generateStudentCode();
+    $student_code = md5($plain_code);
 
-    // Check if the email already exists in the same institute
-    $stmt_check = $conn->prepare("SELECT student_code FROM student WHERE email = ? AND institute_name = ?");
-    $stmt_check->bind_param("ss", $email, $institute);
+    // Check if email already exists for this institute
+    $stmt_check = $conn->prepare("SELECT student_code FROM student WHERE email = ? AND institute_id = ?");
+    $stmt_check->bind_param("si", $email, $institute_id);
     $stmt_check->execute();
     $stmt_check->store_result();
 
     if ($stmt_check->num_rows > 0) {
-        echo "<script>alert('Email already in use!');</script>";
+        echo "<script>alert('Email already in use for this institute!');</script>";
     } else {
-        // Insert new student using prepared statement
-        $stmt_insert = $conn->prepare("INSERT INTO student (student_code, name, email, phone, class, year, dob, institute_name, stupassword)
-                                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt_insert->bind_param("sssssssss", $student_code, $name, $email, $phone, $class, $year, $dob, $institute, $plain_code);
+        // Insert student
+        $stmt_insert = $conn->prepare("INSERT INTO student (student_code, name, email, phone, class, year, dob, institute_id, stupassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt_insert->bind_param("sssssiiss", $student_code, $name, $email, $phone, $class, $year, $dob, $institute_id, $plain_code);
 
         if ($stmt_insert->execute()) {
             echo "<script>alert('Student added successfully!');</script>";
@@ -62,19 +64,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                     <p><strong>Password:</strong> ' . htmlspecialchars($plain_code) . '</p>
                 </div>';
 
-                 // ✅ Log activity
-          $activity = "Student $name registered for  $class";
-          $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
-          $stmt_log->bind_param("s", $activity);
-          $stmt_log->execute();
+            // Log activity
+            $activity = "Student $name registered for $class";
+            $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
+            $stmt_log->bind_param("s", $activity);
+            $stmt_log->execute();
+
         } else {
             echo "<script>alert('Error: " . $stmt_insert->error . "');</script>";
         }
     }
 }
-
-
-
 ?>
 
 <!DOCTYPE html>

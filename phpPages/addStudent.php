@@ -51,26 +51,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     if ($stmt_check->num_rows > 0) {
         echo "<script>alert('Email already in use for this institute!');</script>";
     } else {
-        // Insert student
-        $stmt_insert = $conn->prepare("INSERT INTO student (student_code, name, email, phone, class, year, dob, institute_id, stupassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt_insert->bind_param("sssssiiss", $student_code, $name, $email, $phone, $class, $year, $dob, $institute_id, $plain_code);
+    // Step 1: Check if the class with the given class and year already exists
+    $stmt_check_class = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
+    $stmt_check_class->bind_param("si", $class, $year);
+    $stmt_check_class->execute();
+    $result_class = $stmt_check_class->get_result();
 
-        if ($stmt_insert->execute()) {
-            echo "<script>alert('Student added successfully!');</script>";
-            $success_message = '
-                <div style="margin-top:20px; padding:15px; border:1px solid #ccc; background:#e9f7ef;">
-                    <h3>Submitted Student Email & Password:</h3>
-                    <p><strong>Email:</strong> ' . htmlspecialchars($email) . '</p>
-                    <p><strong>Password:</strong> ' . htmlspecialchars($plain_code) . '</p>
-                </div>';
+    if ($result_class->num_rows > 0) {
+        // Class already exists, fetch the ID
+        $row_class = $result_class->fetch_assoc();
+        $class_id = $row_class['id'];
+    } else {
+        // Class doesn't exist, insert it
+        $stmt_insert_class = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
+        $stmt_insert_class->bind_param("si", $class, $year);
+        $stmt_insert_class->execute();
+        $class_id = $stmt_insert_class->insert_id;
+    }
 
-            // Log activity
-            $activity = "Student $name registered for $class";
-            $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
-            $stmt_log->bind_param("s", $activity);
-            $stmt_log->execute();
+    // Step 2: Insert student with the obtained class_id
+    $stmt_insert = $conn->prepare("INSERT INTO student (student_code, name, email, phone, dob, institute_id, class_id, stupassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt_insert->bind_param("sssssiis", $student_code, $name, $email, $phone, $dob, $institute_id, $class_id, $plain_code);
 
-        } else {
+    if ($stmt_insert->execute()) {
+        echo "<script>alert('Student added successfully!');</script>";
+        $success_message = '
+            <div style="margin-top:20px; padding:15px; border:1px solid #ccc; background:#e9f7ef;">
+                <h3>Submitted Student Email & Password:</h3>
+                <p><strong>Email:</strong> ' . htmlspecialchars($email) . '</p>
+                <p><strong>Password:</strong> ' . htmlspecialchars($plain_code) . '</p>
+            </div>';
+
+        // Log activity
+        $activity = "Student $name registered for $class";
+        $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
+        $stmt_log->bind_param("s", $activity);
+        $stmt_log->execute();
+
+    } else {
             echo "<script>alert('Error: " . $stmt_insert->error . "');</script>";
         }
     }

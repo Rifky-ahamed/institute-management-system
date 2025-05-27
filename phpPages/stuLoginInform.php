@@ -11,24 +11,25 @@ include 'db_connect.php';
 // Get current logged-in institute's email
 $institute_email = $_SESSION['email'];
 
-// Step 1: Get institute name from `users` table
-$query_institute = "SELECT name FROM users WHERE email = ?";
-$stmt = $conn->prepare($query_institute);
+// Step 1: Get user id and name from users table
+$query_user = "SELECT id, name FROM users WHERE email = ?";
+$stmt = $conn->prepare($query_user);
 $stmt->bind_param("s", $institute_email);
 $stmt->execute();
-$result_institute = $stmt->get_result();
+$result_user = $stmt->get_result();
 
-if ($result_institute->num_rows > 0) {
-    $row = $result_institute->fetch_assoc();
-    $institute_name = $row['name'];
+if ($result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+    $institute_id = $user['id'];
+    $institute_name = $user['name'];
 
-    // Step 2: Fetch students of that institute
-    $query_students = "SELECT email, stupassword FROM student WHERE institute_name = ?";
+    // Step 2: Fetch students using institute_id
+    $query_students = "SELECT email, stupassword FROM student WHERE institute_id = ?";
     $stmt_students = $conn->prepare($query_students);
-    $stmt_students->bind_param("s", $institute_name);
+    $stmt_students->bind_param("i", $institute_id);
     $stmt_students->execute();
     $result_students = $stmt_students->get_result();
-} else {
+}  else {
     echo "Institute not found.";
     exit();
 }

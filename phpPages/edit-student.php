@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $new_value = $_POST["value_$field"] ?? '';
 
     // Only allow specific fields
-    $allowed_fields = ['name', 'phone', 'class', 'year', 'dob', 'email'];
+    $allowed_fields = ['name', 'phone', 'dob', 'email'];
     if (!in_array($field, $allowed_fields)) {
         echo "<script>alert('This field cannot be edited.');</script>";
     } else {
@@ -125,8 +125,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <option value="">-- Choose an option --</option>
       <option value="name">Name</option>
       <option value="phone">Phone Number</option>
-      <option value="class">Class</option>
-      <option value="year">Year</option>
       <option value="dob">Date of Birth</option>
       <option value="email">Email</option>
     </select>
@@ -146,23 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="input-group" id="input-phone">
       <label>Enter New Phone Number:</label>
       <input type="text" name="value_phone">
-    </div>
-
-    <div class="input-group" id="input-class">
-      <label for="student_class">Class</label>
-      <select id="student_class" name="value_class">
-        <option value="">-- Select Class --</option>
-        <option value="class 09">class 09</option>
-        <option value="class 10">class 10</option>
-        <option value="class 11">class 11</option>
-        <option value="class 12">class 12</option>
-        <option value="class 13">class 13</option>
-      </select>
-    </div>
-
-    <div class="input-group" id="input-year">
-      <label for="student_year">Year</label>
-      <input type="number" id="student_year" name="value_year" min="2020" max="2099" step="1">
     </div>
 
     <div class="input-group" id="input-dob">

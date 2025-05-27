@@ -26,26 +26,31 @@ if ($row_user = $result_user->fetch_assoc()) {
     $class = $_GET['class'] ?? '';
     $year = $_GET['year'] ?? '';
 
-    // Base query to get students by institute_id
-    $query_students = "SELECT * FROM student WHERE institute_id = ?";
+    // Query with JOIN
+    $query_students = "
+        SELECT student.*, class.class AS class_name, class.year 
+        FROM student 
+        JOIN class ON student.class_id = class.id 
+        WHERE student.institute_id = ?";
+        
     $params = [$institute_id];
     $types = "i";
 
     if (!empty($search)) {
-        $query_students .= " AND (name LIKE ? OR student_code LIKE ?)";
+        $query_students .= " AND (student.name LIKE ? OR student.stupassword  LIKE ?)";
         $params[] = "%$search%";
-        $params[] = "%$search%";  // no need md5 here for searching student_code
+        $params[] = "%$search%";
         $types .= "ss";
     }
 
     if (!empty($class)) {
-        $query_students .= " AND class = ?";
+        $query_students .= " AND class.class = ?";
         $params[] = $class;
         $types .= "s";
     }
 
     if (!empty($year)) {
-        $query_students .= " AND year = ?";
+        $query_students .= " AND class.year = ?";
         $params[] = (int)$year;
         $types .= "i";
     }
@@ -56,14 +61,13 @@ if ($row_user = $result_user->fetch_assoc()) {
     $result = $stmt_students->get_result();
 
 } else {
-    $result = false; // No user found
+    $result = false;
 }
 
 // Delete student
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
     $student_code = $_POST['student_code'];
 
-    // Make sure to delete only student belonging to the current institute
     $stmt_del = $conn->prepare("DELETE FROM student WHERE student_code = ? AND institute_id = ?");
     $stmt_del->bind_param("si", $student_code, $institute_id);
 
@@ -78,10 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Manage Students - Admin Panel</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -157,10 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
       padding: 8px;
       margin-right: 10px;
     }
-    .search-filter input{
+    .search-filter input {
       width: 205px;
     }
-    #student_year{
+    #student_year {
       width: 100px;
     }
   </style>
@@ -186,26 +190,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
     <button onclick="window.location.href='edit-student.php';">Edit Student Information</button>
   </div>
 
-<div class="search-filter">
-  <form method="GET" action="">
-    <input type="text" name="search" placeholder="Search by name or Student-code..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+  <div class="search-filter">
+    <form method="GET" action="">
+      <input type="text" name="search" placeholder="Search by name or Student-code..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
 
-    <select name="class">
-      <option value="">All Classes</option>
-      <option value="Class 09" <?php if(($_GET['class'] ?? '') == 'Class 09') echo 'selected'; ?>>Class 09</option>
-      <option value="Class 10" <?php if(($_GET['class'] ?? '') == 'Class 10') echo 'selected'; ?>>Class 10</option>
-      <option value="Class 11" <?php if(($_GET['class'] ?? '') == 'Class 11') echo 'selected'; ?>>Class 11</option>
-      <option value="Class 12" <?php if(($_GET['class'] ?? '') == 'Class 12') echo 'selected'; ?>>Class 12</option>
-      <option value="Class 13" <?php if(($_GET['class'] ?? '') == 'Class 13') echo 'selected'; ?>>Class 13</option>
-    </select>
+      <select name="class">
+        <option value="">All Classes</option>
+        <option value="Class 09" <?php if(($_GET['class'] ?? '') == 'Class 09') echo 'selected'; ?>>Class 09</option>
+        <option value="Class 10" <?php if(($_GET['class'] ?? '') == 'Class 10') echo 'selected'; ?>>Class 10</option>
+        <option value="Class 11" <?php if(($_GET['class'] ?? '') == 'Class 11') echo 'selected'; ?>>Class 11</option>
+        <option value="Class 12" <?php if(($_GET['class'] ?? '') == 'Class 12') echo 'selected'; ?>>Class 12</option>
+        <option value="Class 13" <?php if(($_GET['class'] ?? '') == 'Class 13') echo 'selected'; ?>>Class 13</option>
+      </select>
 
-    <label for="student_year">Year</label>
-    <input type="number" id="student_year" name="year" min="2020" max="2099" step="1" value="<?php echo htmlspecialchars($_GET['year'] ?? ''); ?>">
+      <label for="student_year">Year</label>
+      <input type="number" id="student_year" name="year" min="2020" max="2099" step="1" value="<?php echo htmlspecialchars($_GET['year'] ?? ''); ?>">
 
-    <button type="submit">Filter</button>
-  </form>
-</div>
-
+      <button type="submit">Filter</button>
+    </form>
+  </div>
 
   <table>
     <thead>
@@ -219,7 +222,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
       </tr>
     </thead>
     <tbody>
-      
 <?php
 $counter = 1;
 if ($result && $result->num_rows > 0):
@@ -229,7 +231,7 @@ if ($result && $result->num_rows > 0):
         <td><?php echo $counter++; ?></td>
         <td><?php echo htmlspecialchars($row['name']); ?></td>
         <td><?php echo htmlspecialchars($row['email']); ?></td>
-        <td><?php echo htmlspecialchars($row['class']); ?></td>
+        <td><?php echo htmlspecialchars($row['class_name']); ?></td>
         <td><?php echo htmlspecialchars($row['phone']); ?></td>
         <td>
           <form method="POST" onsubmit="return confirm('Are you sure you want to delete this student?');">
@@ -244,7 +246,7 @@ else:
 ?>
     <tr><td colspan="6">No students found.</td></tr>
 <?php endif; ?>
-</tbody>
+    </tbody>
   </table>
 </div>
 

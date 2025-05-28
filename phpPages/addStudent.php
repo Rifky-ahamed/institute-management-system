@@ -218,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
         <div class="form-group">
           <label for="student_year">Year</label>
-          <input type="number" id="student_year" name="student_year" min="2020" max="2099" step="1" required>
+          <input type="number" id="student_year" name="student_year" min="2024" max="2099" step="1" required>
         </div>
       </div>
 

@@ -10,6 +10,8 @@ if (!isset($_SESSION['logged_in'])) {
 include('db_connect.php'); 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
+
+
 ?>
 
 <!DOCTYPE html>
@@ -155,10 +157,16 @@ $user_email = $_SESSION['email'];
   <div class="form-row">
     <label for="subject">Subject</label>
     <select id="subject" name="subject" required>
-      <option value="">Select Subject</option>
-      <option value="Math">Math</option>
-      <option value="Science">Science</option>
-      <option value="English">English</option>
+        <option value="">Select Subject</option>
+        <option value="1">Mathematics</option>
+        <option value="2">Science</option>
+        <option value="3">English</option>
+        <option value="4">Sinhala</option>
+        <option value="5">Tamil</option>
+        <option value="6">Islam</option>
+        <option value="7">GEO</option>
+        <option value="8">Civices</option>
+        <option value="9">History</option>
     </select>
   </div>
 
@@ -188,7 +196,7 @@ $user_email = $_SESSION['email'];
 
   <div class="form-row">
     <label for="teacher">Teacher</label>
-    <select id="teacher" name="teacher" required>
+   <select id="teacher" name="teacher" required>
       <option value="">Select Teacher</option>
       <option>Mr. John</option>
       <option>Ms. Sarah</option>
@@ -235,6 +243,33 @@ $user_email = $_SESSION['email'];
       </tbody>
     </table>
   </div>
+<script>
+  document.getElementById('subject').addEventListener('change', function () {
+    const subjectId = this.value;
+    const teacherSelect = document.getElementById('teacher');
+
+    if (subjectId !== "") {
+      fetch('get_teachers.php?subject_id=' + subjectId)
+        .then(response => response.json())
+        .then(data => {
+          // Clear current options
+          teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+          
+          data.forEach(teacher => {
+            const option = document.createElement('option');
+            option.value = teacher.id;
+            option.textContent = teacher.name;
+            teacherSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching teachers:', error);
+        });
+    } else {
+      teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+    }
+  });
+</script>
 
 </body>
 </html>

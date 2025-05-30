@@ -84,9 +84,7 @@ if ($actResult && $actResult->num_rows > 0) {
     <a href="#"><i class="fa fa-chart-line"></i> Dashboard</a>
     <a href="manageStudent.php"><i class="fa fa-user-graduate"></i> Manage Students</a>
     <a href="manageTeacher.php"><i class="fa fa-chalkboard-teacher"></i> Manage Teachers</a>
-    <a href="#"><i class="fa fa-layer-group"></i> Manage Classes</a>
-    <a href="#"><i class="fa fa-book"></i> Manage Subjects</a>
-    <a href="#"><i class="fa fa-calendar-alt"></i> Schedule</a>
+    <a href="Schedule.php"><i class="fa fa-calendar-alt"></i> Schedule</a>
     <a href="#"><i class="fa fa-check-square"></i> Attendance</a>
     <a href="#"><i class="fa fa-money-bill-wave"></i> Payments</a>
     <a href="#"><i class="fa fa-bell"></i> Notifications</a>
@@ -107,10 +105,10 @@ if ($actResult && $actResult->num_rows > 0) {
     <div class="section">
       <h3>Quick Actions</h3>
       <div class="actions">
-        <button>Add New Class</button>
         <button onclick="window.location.href='addStudent.php';">Add Student</button>
-        <button onclick="window.location.href='manageTeacher.php';">Add Teacher</button>
-        <button>Update Timetable</button>
+        <button onclick="window.location.href='addteacher.php';">Add Teacher</button>
+        <button onclick="window.location.href='Schedule.php';">Update Timetable</button>
+        
       </div>
     </div>
 

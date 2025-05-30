@@ -212,9 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_teacher'])) {
     <a href="dashboard.php"><i class="fa fa-chart-line"></i> Dashboard</a>
     <a href="manageStudent.php"><i class="fa fa-user-graduate"></i> Manage Students</a>
     <a href="#"><i class="fa fa-chalkboard-teacher"></i> Manage Teachers</a>
-    <a href="#"><i class="fa fa-layer-group"></i> Manage Classes</a>
-    <a href="#"><i class="fa fa-book"></i> Manage Subjects</a>
-    <a href="#"><i class="fa fa-calendar-alt"></i> Schedule</a>
+    <a href="Schedule.php"><i class="fa fa-calendar-alt"></i> Schedule</a>
   </div>
 
   <div class="main">

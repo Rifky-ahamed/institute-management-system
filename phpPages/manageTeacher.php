@@ -5,6 +5,79 @@ if (!isset($_SESSION['logged_in'])) {
     exit();
 }
 include('db_connect.php');
+
+$user_email = $_SESSION['email'];
+
+$query_user = "SELECT id FROM users WHERE email = ?";
+$stmt_user = $conn->prepare($query_user);
+$stmt_user->bind_param("s", $user_email);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
+
+if ($row_user = $result_user->fetch_assoc()) {
+    $institute_id = $row_user['id'];
+
+    $search = $_GET['search'] ?? '';
+    $class = $_GET['class'] ?? '';
+    $year = $_GET['year'] ?? '';
+    $subject = $_GET['subjects'] ?? '';
+
+    $query = "
+        SELECT teachers.*, subjects.subject, class.class AS class, class.year
+        FROM teachers
+        JOIN subjects ON teachers.subject_id = subjects.id
+        JOIN class ON teachers.class_id = class.id
+        WHERE teachers.institute_id = ?";
+
+    $params = [$institute_id];
+    $types = "i";
+
+    if (!empty($search)) {
+        $query .= " AND (teachers.name LIKE ? OR teachers.teacher_code LIKE ?)";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+        $types .= "ss";
+    }
+    if (!empty($class)) {
+        $query .= " AND class.class = ?";
+        $params[] = $class;
+        $types .= "s";
+    }
+    if (!empty($year)) {
+        $query .= " AND class.year = ?";
+        $params[] = (int)$year;
+        $types .= "i";
+    }
+    if (!empty($subject)) {
+        $query .= " AND subjects.subject_name = ?";
+        $params[] = $subject;
+        $types .= "s";
+    }
+
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+} else {
+    $result = false;
+}
+
+// Delete teacher
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_teacher'])) {
+    $teacher_id = $_POST['id'];
+
+    $stmt_del = $conn->prepare("DELETE FROM teachers WHERE teacher_code = ? AND institute_id = ?");
+    $stmt_del->bind_param("ii", $teacher_id, $institute_id);
+
+    if ($stmt_del->execute()) {
+        echo "<script>alert('Teacher deleted successfully'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
+        exit();
+    } else {
+        echo "<script>alert('Error deleting teacher');</script>";
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -126,7 +199,10 @@ include('db_connect.php');
       width: 205px;
     }
     #subject{
-      width: 120px;
+      width: 160px;
+    }
+    #student_year{
+      width: 100px;
     }
   </style>
 </head>
@@ -160,9 +236,26 @@ include('db_connect.php');
       <option value="Class 12" <?php if(($_GET['class'] ?? '') == 'Class 12') echo 'selected'; ?>>Class 12</option>
       <option value="Class 13" <?php if(($_GET['class'] ?? '') == 'Class 13') echo 'selected'; ?>>Class 13</option>
     </select>
- <label for="subject">subject</label>
-    <input type="text" id="subject" value="<?php echo htmlspecialchars($_GET['subject'] ?? ''); ?>">
 
+    <label for="student_year">Year</label>
+      <input type="number" id="student_year" name="year" min="2020" max="2099" step="1" value="<?php echo htmlspecialchars($_GET['year'] ?? ''); ?>">
+
+ <label for="subject">subject</label>
+   <select name="subject" id="subject">
+  <option value="">All Subjects</option>
+  <option value="Mathematics" <?php if(($_GET['subject'] ?? '') == 'Mathematics') echo 'selected'; ?>>Mathematics</option>
+  <option value="Science" <?php if(($_GET['subject'] ?? '') == 'Science') echo 'selected'; ?>>Science</option>
+  <option value="English" <?php if(($_GET['subject'] ?? '') == 'English') echo 'selected'; ?>>English</option>
+  <option value="History" <?php if(($_GET['subject'] ?? '') == 'Sinhala') echo 'selected'; ?>>Sinhala</option>
+  <option value="Geography" <?php if(($_GET['subject'] ?? '') == 'Tamil') echo 'selected'; ?>>Tamil</option>
+  <option value="ICT" <?php if(($_GET['subject'] ?? '') == 'Islam') echo 'selected'; ?>>Islam</option>
+  <option value="Commerce" <?php if(($_GET['subject'] ?? '') == 'GEO') echo 'selected'; ?>>GEO</option>
+  <option value="Biology" <?php if(($_GET['subject'] ?? '') == 'Civices') echo 'selected'; ?>>Civices</option>
+  <option value="Physics" <?php if(($_GET['subject'] ?? '') == 'History') echo 'selected'; ?>>History</option>
+</select>
+
+
+    
     <button type="submit">Filter</button>
   </form>
 </div>
@@ -178,19 +271,35 @@ include('db_connect.php');
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>101</td>
-          <td>John Doe</td>
-          <td>john@example.com</td>
-          <td>Mathematics</td>
-          <td>+94 77 123 4567</td>
-          <td>
-             <button type="submit" name="delete_student" style="background-color:#FF6347; color:white; padding:6px 10px; border:none; border-radius:4px;">Delete</button>
-          </td>
-        </tr>
-       
-        
-      </tbody>
+<?php
+$counter = 1;
+if ($result && $result->num_rows > 0):
+    while ($row = $result->fetch_assoc()):
+?>
+    <tr>
+        <td><?php echo $counter++; ?></td>
+        <td><?php echo htmlspecialchars($row['name']); ?></td>
+        <td><?php echo htmlspecialchars($row['email']); ?></td>
+        <td><?php echo htmlspecialchars($row['subject']); ?></td>
+        <td><?php echo htmlspecialchars($row['number']); ?></td>
+        <td>
+            <form method="POST" style="display:inline;">
+                <input type="hidden" name="id" value="<?php echo $row['teacher_code']; ?>">
+                <button type="submit" name="delete_teacher" class="delete-btn" onclick="return confirm('Are you sure you want to delete this teacher?');">Delete</button>
+            </form>
+        </td>
+    </tr>
+<?php
+    endwhile;
+else:
+?>
+    <tr>
+        <td colspan="6" style="text-align: center;">No teachers found.</td>
+    </tr>
+<?php endif; ?>
+
+</tbody>
+
     </table>
   </div>
 </body>

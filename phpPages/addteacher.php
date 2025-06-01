@@ -94,6 +94,27 @@ if ($result_email->num_rows > 0) {
 
     if ($stmt_insert_teacher->execute()) {
         echo "<script>alert('Teacher added successfully!'); window.location.href='addteacher.php';</script>";
+         // Get subject name
+    $stmt_subject = $conn->prepare("SELECT subject FROM subjects WHERE id = ?");
+    $stmt_subject->bind_param("i", $subject_id);
+    $stmt_subject->execute();
+    $stmt_subject->bind_result($subject_name);
+    $stmt_subject->fetch();
+    $stmt_subject->close();
+
+    // Get class name
+    $stmt_class = $conn->prepare("SELECT class FROM class WHERE id = ?");
+    $stmt_class->bind_param("i", $class_id);
+    $stmt_class->execute();
+    $stmt_class->bind_result($class_name);
+    $stmt_class->fetch();
+    $stmt_class->close();
+
+    // Log activity
+    $activity = "Teacher $name registered for class $class_name to teach $subject_name";
+    $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
+    $stmt_log->bind_param("s", $activity);
+    $stmt_log->execute();
     } else {
         echo "Error: " . $stmt_insert_teacher->error;
     }

@@ -143,9 +143,12 @@ $user_email = $_SESSION['email'];
     <label for="class">Class</label>
     <select id="class" name="class" required>
       <option value="">Select Class</option>
-      <option value="Grade 10">Grade 10</option>
-      <option value="Grade 11">Grade 11</option>
-      <option value="Grade 12">Grade 12</option>
+     <option value="">-- Select Class --</option>
+            <option value="class 09">class 09</option>
+            <option value="class 10">class 10</option>
+            <option value="class 11">class 11</option>
+            <option value="class 12">class 12</option>
+            <option value="class 13">class 13</option>
     </select>
   </div>
 

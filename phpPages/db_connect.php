@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
 $username = "root";
-$password = "new_password";
+$password = "";
 $database = "institute_management_db";
 
 $conn = new mysqli($host, $username, $password, $database);

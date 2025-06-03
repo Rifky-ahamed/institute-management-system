@@ -11,6 +11,52 @@ include('db_connect.php');
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+   
+
+    // Step 2: Fetch institute ID from users table
+    $institute_id = null;
+    $institute_query = "SELECT id FROM users WHERE email = '$user_email' LIMIT 1";
+    $institute_result = mysqli_query($conn, $institute_query);
+    if ($institute_result && mysqli_num_rows($institute_result) > 0) {
+        $row = mysqli_fetch_assoc($institute_result);
+        $institute_id = $row['id'];
+    } else {
+        die("Error: Institute not found.");
+    }
+
+    // Step 3: Extract class and year
+    if (isset($_POST['class_and_year'])) {
+        list($class_value, $year) = explode('|', $_POST['class_and_year']);
+        $class = 'Class ' . $class_value;
+    }
+
+    // Step 4: Other fields
+    $subject = $_POST['subject'];
+    $day = $_POST['day'];
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
+    $teacher_id = $_POST['teacher'];
+
+    // Step 5: Get teacher name
+    $teacher_name = '';
+    $teacher_query = "SELECT name FROM teachers WHERE teacher_code = '$teacher_id'";
+    $teacher_result = mysqli_query($conn, $teacher_query);
+    if ($teacher_result && mysqli_num_rows($teacher_result) > 0) {
+        $teacher_row = mysqli_fetch_assoc($teacher_result);
+        $teacher_name = $teacher_row['name'];
+    }
+
+    // Step 6: Insert into schedule
+    $insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, institute_id)
+                     VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$institute_id')";
+
+    if (mysqli_query($conn, $insert_query)) {
+        echo "<script>alert('Schedule added successfully!'); window.location.href='schedule.php';</script>";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
 
 ?>
 
@@ -138,24 +184,25 @@ $user_email = $_SESSION['email'];
   <div class="container">
     <h2>Add New Schedule Entry</h2>
 
-    <form action="schedule_process.php" method="POST">
-  <div class="form-row">
-    <label for="class">Class</label>
-    <select id="class" name="class" required>
-      <option value="">Select Class</option>
-     <option value="">-- Select Class --</option>
-            <option value="class 09">class 09</option>
-            <option value="class 10">class 10</option>
-            <option value="class 11">class 11</option>
-            <option value="class 12">class 12</option>
-            <option value="class 13">class 13</option>
-    </select>
-  </div>
+    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+<div class="form-row">
+  <label for="class_and_year">Class and Year</label>
+  <select id="class_and_year" name="class_and_year" required>
+    <option value="">-- Select Class and Year --</option>
+    <?php
+      $class_query = "SELECT class, year FROM class";
+      $class_result = mysqli_query($conn, $class_query);
+      if ($class_result && mysqli_num_rows($class_result) > 0) {
+          while ($row = mysqli_fetch_assoc($class_result)) {
+              $class = $row['class'];
+              $year = $row['year'];
+              echo "<option value='{$class}|{$year}'>Class $class - $year</option>";
+          }
+      }
+    ?>
+  </select>
+</div>
 
-  <div class="form-row">
-    <label for="year">Year</label>
-    <input type="number" id="student_year" name="student_year" min="2024" max="2099" step="1" required>
-  </div>
 
   <div class="form-row">
     <label for="subject">Subject</label>

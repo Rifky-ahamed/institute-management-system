@@ -83,3 +83,24 @@ CREATE TABLE teachers (
         ON DELETE SET NULL
 );
 
+CREATE TABLE schedule (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    class VARCHAR(50),
+    year INT NOT NULL,
+    subject VARCHAR(100),
+    day VARCHAR(20),
+    start_time TIME,
+    end_time TIME,
+    teacher_name VARCHAR(100)
+);
+
+ALTER TABLE schedule
+ADD COLUMN institute_id INT;
+
+
+ALTER TABLE schedule
+ADD CONSTRAINT fk_institute
+FOREIGN KEY (institute_id) REFERENCES users(id)
+ON UPDATE CASCADE
+ON DELETE CASCADE;
+

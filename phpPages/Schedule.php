@@ -11,10 +11,7 @@ include('db_connect.php');
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-   
-
-    // Step 2: Fetch institute ID from users table
+ // Step 2: Fetch institute ID from users table
     $institute_id = null;
     $institute_query = "SELECT id FROM users WHERE email = '$user_email' LIMIT 1";
     $institute_result = mysqli_query($conn, $institute_query);
@@ -24,7 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         die("Error: Institute not found.");
     }
-
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+   
     // Step 3: Extract class and year
     if (isset($_POST['class_and_year'])) {
         list($class_value, $year) = explode('|', $_POST['class_and_year']);
@@ -265,32 +263,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <table>
       <thead>
         <tr>
+          <th>Class & Year</th>
+          <th>Subject</th>
+          <th>Day</th>
           <th>Time</th>
-          <th>Monday</th>
-          <th>Tuesday</th>
-          <th>Wednesday</th>
-          <th>Thursday</th>
-          <th>Friday</th>
+          <th>Teacher</th>
+          
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>8:00 - 9:00</td>
-          <td>Math</td>
-          <td>Science</td>
-          <td>English</td>
-          <td>History</td>
-          <td>ICT</td>
-        </tr>
-        <tr>
-          <td>9:00 - 10:00</td>
-          <td>Science</td>
-          <td>Math</td>
-          <td>ICT</td>
-          <td>English</td>
-          <td>History</td>
-        </tr>
-      </tbody>
+   <tbody>
+  <?php
+    // Subject ID to name mapping
+    $subject_names = [
+        1 => 'Mathematics',
+        2 => 'Science',
+        3 => 'English',
+        4 => 'Sinhala',
+        5 => 'Tamil',
+        6 => 'Islam',
+        7 => 'GEO',
+        8 => 'Civics',
+        9 => 'History'
+    ];
+
+    $schedule_query = "SELECT * FROM schedule WHERE institute_id = '$institute_id' ORDER BY day, start_time";
+    $schedule_result = mysqli_query($conn, $schedule_query);
+
+    if ($schedule_result && mysqli_num_rows($schedule_result) > 0) {
+        while ($row = mysqli_fetch_assoc($schedule_result)) {
+            $class_year = $row['class'] . ' - ' . $row['year'];
+
+            $subject_id = $row['subject'];
+            $subject = isset($subject_names[$subject_id]) ? $subject_names[$subject_id] : 'Unknown';
+
+            $day = $row['day'];
+            $time = date('H:i', strtotime($row['start_time'])) . ' to ' . date('H:i', strtotime($row['end_time']));
+            $teacher = $row['teacher_name'];
+
+            echo "<tr>
+                    <td>{$class_year}</td>
+                    <td>{$subject}</td>
+                    <td>{$day}</td>
+                    <td>{$time}</td>
+                    <td>{$teacher}</td>
+                  </tr>";
+        }
+    } else {
+        echo "<tr><td colspan='5'>No schedule entries found.</td></tr>";
+    }
+  ?>
+</tbody>
+
     </table>
   </div>
 <script>

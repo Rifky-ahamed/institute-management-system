@@ -1,6 +1,4 @@
 <?php
-
-
 session_start();
 
 if (!isset($_SESSION['logged_in'])) {
@@ -9,16 +7,14 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 include('db_connect.php'); 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $field = $_POST['field'];
-    $code = $_POST['student_code']; // assuming this is a unique identifier
-    $updateField = "";
-    $updateValue = "";
+    $code = $_POST['student_code'];
 
     if ($field === 'email') {
         $newEmail = $_POST['value_email'];
 
-        // Check if email already exists
         $checkEmail = $conn->prepare("SELECT * FROM teachers WHERE email = ?");
         $checkEmail->bind_param("s", $newEmail);
         $checkEmail->execute();
@@ -27,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             echo "<script>alert('Email already exists!');</script>";
         } else {
-            $update = $conn->prepare("UPDATE teachers SET email = ? WHERE teacher_code  = ?");
+            $update = $conn->prepare("UPDATE teachers SET email = ? WHERE teacher_code = ?");
             $update->bind_param("si", $newEmail, $code);
             $update->execute();
             echo "<script>alert('Email updated successfully');</script>";
@@ -36,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     elseif ($field === 'name') {
         $name = $_POST['value_name'];
-        $update = $conn->prepare("UPDATE teachers SET name = ? WHERE teacher_code  = ?");
+        $update = $conn->prepare("UPDATE teachers SET name = ? WHERE teacher_code = ?");
         $update->bind_param("si", $name, $code);
         $update->execute();
         echo "<script>alert('Name updated successfully');</script>";
@@ -44,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     elseif ($field === 'phone') {
         $number = $_POST['value_phone'];
-        $update = $conn->prepare("UPDATE teachers SET number = ? WHERE teacher_code  = ?");
+        $update = $conn->prepare("UPDATE teachers SET number = ? WHERE teacher_code = ?");
         $update->bind_param("si", $number, $code);
         $update->execute();
         echo "<script>alert('Phone number updated successfully');</script>";
@@ -52,40 +48,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     elseif ($field === 'dob') {
         $dob = $_POST['value_dob'];
-        $update = $conn->prepare("UPDATE teachers SET dob = ? WHERE teacher_code  = ?");
+        $update = $conn->prepare("UPDATE teachers SET dob = ? WHERE teacher_code = ?");
         $update->bind_param("si", $dob, $code);
         $update->execute();
         echo "<script>alert('Date of birth updated successfully');</script>";
     }
 
-  elseif ($field === 'subject') {
-    if (!empty($_POST["subject1"])) {
-        $subjectName = trim($_POST["subject1"]);
+    elseif ($field === 'subject') {
+        if (!empty($_POST["subject1"])) {
+            $subjectName = trim($_POST["subject1"]);
+            $stmt = $conn->prepare("SELECT id FROM subjects WHERE subject = ?");
+            $stmt->bind_param("s", $subjectName);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-        // Get subject ID from the subject table
-        $stmt = $conn->prepare("SELECT id FROM subjects WHERE  	subject  = ?");
-        $stmt->bind_param("s", $subjectName);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($row = $result->fetch_assoc()) {
-            $subject_id = $row['id'];
-            $update = $conn->prepare("UPDATE teachers SET subject_id = ? WHERE teacher_code = ?");
-            $update->bind_param("ii", $subject_id, $code);
-            $update->execute();
-            echo "<script>alert('Subject updated successfully');</script>";
+            if ($row = $result->fetch_assoc()) {
+                $subject_id = $row['id'];
+                $update = $conn->prepare("UPDATE teachers SET subject_id = ? WHERE teacher_code = ?");
+                $update->bind_param("ii", $subject_id, $code);
+                $update->execute();
+                echo "<script>alert('Subject updated successfully');</script>";
+            } else {
+                echo "<script>alert('Subject not found in database.');</script>";
+            }
         } else {
-            echo "<script>alert('Subject not found in database.');</script>";
+            echo "<script>alert('Please select a subject.');</script>";
         }
-    } else {
-        echo "<script>alert('Please select a subject.');</script>";
+    }
+
+    elseif ($field === 'class_year') {
+        $newClass = $_POST['value_class'];
+        $newYear = $_POST['value_year'];
+
+        if (!empty($newClass) && !empty($newYear)) {
+            // Step 1: Check if class-year pair exists
+            $stmt = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
+            $stmt->bind_param("ss", $newClass, $newYear);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($row = $result->fetch_assoc()) {
+                // Found existing class
+                $class_id = $row['id'];
+            } else {
+                // Insert new class-year
+                $insert = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
+                $insert->bind_param("ss", $newClass, $newYear);
+                $insert->execute();
+                $class_id = $insert->insert_id;
+            }
+
+            // Step 2: Update teacher's class_id
+            $update = $conn->prepare("UPDATE teachers SET class_id = ? WHERE teacher_code = ?");
+            $update->bind_param("ii", $class_id, $code);
+            $update->execute();
+            echo "<script>alert('Class & Year updated successfully');</script>";
+        } else {
+            echo "<script>alert('Please select both Class and Year.');</script>";
+        }
     }
 }
-
-
-
-    }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -144,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
 <div class="container">
-  <h2>Edit teacher Detail</h2>
+  <h2>Edit Teacher Detail</h2>
 
   <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST" id="edit-form">
     <label for="field-select">Select a field to edit:</label>
@@ -155,12 +177,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <option value="dob">Date of Birth</option>
       <option value="email">Email</option>
       <option value="subject">Subjects</option>
+      <option value="class_year">Class & Year</option>
     </select>
 
     <input type="hidden" name="field" id="field-name">
 
     <div class="input-group" id="student-code-group">
-      <label>Enter teacher Code:</label>
+      <label>Enter Teacher Code:</label>
       <input type="text" name="student_code" required>
     </div>
 
@@ -184,22 +207,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <input type="email" name="value_email">
     </div>
 
-   <div class="input-group" id="input-subject">
-  <label for="subject1">Select Subject:</label>
-  <select name="subject1">
-    <option value="">-- Select Subject --</option>
-    <option value="Mathematics">Mathematics</option>
-    <option value="Science">Science</option>
-    <option value="English">English</option>
-    <option value="Sinhala">Sinhala</option>
-    <option value="Tamil">Tamil</option>
-    <option value="Islam">Islam</option>
-    <option value="GEO">GEO</option>
-    <option value="Civices">Civices</option>
-    <option value="History">History</option>
-  </select>
-</div>
+    <div class="input-group" id="input-subject">
+      <label for="subject1">Select Subject:</label>
+      <select name="subject1">
+        <option value="">-- Select Subject --</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Science">Science</option>
+        <option value="English">English</option>
+        <option value="Sinhala">Sinhala</option>
+        <option value="Tamil">Tamil</option>
+        <option value="Islam">Islam</option>
+        <option value="GEO">GEO</option>
+        <option value="Civices">Civices</option>
+        <option value="History">History</option>
+      </select>
+    </div>
 
+    <div class="input-group" id="input-class_year">
+      <label>Select New Class:</label>
+      <select name="value_class" id="value_class">
+        <option value="">-- Select Class --</option>
+        <option value="class 09">class 09</option>
+        <option value="class 10">class 10</option>
+        <option value="class 11">class 11</option>
+        <option value="class 12">class 12</option>
+        <option value="class 13">class 13</option>
+      </select>
+
+      <label>Enter New Year:</label>
+      <input type="number" name="value_year" id="value_year" min="2024" max="2099" step="1">
+    </div>
 
     <button type="submit" id="submit-btn" style="display:none;">Update Field</button>
   </form>
@@ -211,8 +248,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   const submitBtn = document.getElementById('submit-btn');
   const fieldName = document.getElementById('field-name');
 
- 
-
   fieldSelect.addEventListener('change', () => {
     inputGroups.forEach(group => group.style.display = 'none');
     const selectedField = fieldSelect.value;
@@ -220,41 +255,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (selectedField) {
       document.getElementById('student-code-group').style.display = 'block';
-      document.getElementById('input-' + selectedField).style.display = 'block';
+      const group = document.getElementById('input-' + selectedField);
+      if (group) group.style.display = 'block';
       submitBtn.style.display = 'block';
     } else {
       submitBtn.style.display = 'none';
     }
-
-    if (selectedField !== 'subject') {
-      subjectSelectsContainer.innerHTML = '';
-      subjectCountSelect.value = '';
-    }
   });
 
-  subjectCountSelect.addEventListener('change', () => {
-    const count = parseInt(subjectCountSelect.value);
-    subjectSelectsContainer.innerHTML = '';
+  document.getElementById('edit-form').addEventListener('submit', function (e) {
+    const selectedField = fieldSelect.value;
 
-    const options = `
-      <option value="">-- Select Subject --</option>
-      <option value="Math">Math</option>
-      <option value="Science">Science</option>
-      <option value="English">English</option>
-      <option value="History">History</option>
-      <option value="Geography">Geography</option>
-      <option value="ICT">ICT</option>
-      <option value="Biology">Biology</option>
-      <option value="Chemistry">Chemistry</option>
-      <option value="Physics">Physics</option>
-    `;
+    if (selectedField === 'class_year') {
+      const classValue = document.getElementById('value_class').value;
+      const yearValue = document.getElementById('value_year').value;
 
-    for (let i = 1; i <= count; i++) {
-      const select = document.createElement('select');
-      select.name = `subject${i}`;
-      select.innerHTML = options;
-      select.style.marginBottom = '10px';
-      subjectSelectsContainer.appendChild(select);
+      if (!classValue || !yearValue) {
+        alert("You must select both Class and Year.");
+        e.preventDefault();
+      }
     }
   });
 </script>

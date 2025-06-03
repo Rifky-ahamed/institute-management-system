@@ -1,65 +1,99 @@
 <?php
-
 session_start();
-
 if (!isset($_SESSION['logged_in'])) {
     header("Location: log.php");
     exit();
 }
+include('db_connect.php');
 
-include('db_connect.php'); 
+$message = '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $field = $_POST['field'] ?? '';
     $student_code = $_POST['student_code'] ?? '';
-    $new_value = $_POST["value_$field"] ?? '';
 
-    // Only allow specific fields
-    $allowed_fields = ['name', 'phone', 'dob', 'email'];
-    if (!in_array($field, $allowed_fields)) {
-        echo "<script>alert('This field cannot be edited.');</script>";
+    $stmt = $conn->prepare("SELECT * FROM student WHERE stupassword = ?");
+    $stmt->bind_param("s", $student_code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if (!$result || $result->num_rows === 0) {
+        $message = "Student code does not exist.";
     } else {
-        // Check if student exists
-        $stmt = $conn->prepare("SELECT * FROM student WHERE stupassword = ?");
-        $stmt->bind_param("s", $student_code);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $student = $result->fetch_assoc();
 
-        if ($result && $result->num_rows > 0) {
-            // Student exists
-            if ($field === 'email') {
-                // Get institute_name for this student
-                $student_data = $result->fetch_assoc();
-                $institute_name = $student_data['institute_name'];
+        if ($field === 'class_year') {
+            $class = $_POST['value_class'] ?? '';
+            $year = $_POST['value_year'] ?? '';
 
-                // Check if the new email already exists in same institute
-                $check_email = $conn->prepare("SELECT * FROM student WHERE email = ? AND institute_name = ? AND stupassword != ?");
-                $check_email->bind_param("sss", $new_value, $institute_name, $student_code);
-                $check_email->execute();
-                $email_result = $check_email->get_result();
+            if (!$class || !$year) {
+                $message = "Both class and year must be provided.";
+            } else {
+                $check_stmt = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
+                $check_stmt->bind_param("ss", $class, $year);
+                $check_stmt->execute();
+                $check_result = $check_stmt->get_result();
 
-                if ($email_result && $email_result->num_rows > 0) {
-                    echo "<script>alert('This email already exists under your institute. Please use a different email.'); window.location.href='edit-student.php';</script>";
-                    exit();
+                if ($check_result->num_rows > 0) {
+                    $class_row = $check_result->fetch_assoc();
+                    $class_id = $class_row['id'];
+                } else {
+                    $insert_stmt = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
+                    $insert_stmt->bind_param("ss", $class, $year);
+                    if ($insert_stmt->execute()) {
+                        $class_id = $insert_stmt->insert_id;
+                    } else {
+                        $message = "Failed to insert new class.";
+                    }
+                }
+
+                if (!$message) {
+                    $update_stmt = $conn->prepare("UPDATE student SET class_id = ? WHERE stupassword = ?");
+                    $update_stmt->bind_param("is", $class_id, $student_code);
+                    if ($update_stmt->execute()) {
+                        $message = "Class and Year updated successfully!";
+                    } else {
+                        $message = "Failed to update student class.";
+                    }
                 }
             }
-
-            // Safe to update
-            $update_query = "UPDATE student SET $field = ? WHERE stupassword = ?";
-            $update_stmt = $conn->prepare($update_query);
-            $update_stmt->bind_param("ss", $new_value, $student_code);
-            if ($update_stmt->execute()) {
-                echo "<script>alert('Student $field updated successfully!'); window.location.href='edit-student.php';</script>";
-                exit();
-            } else {
-                echo "<script>alert('Update failed. Try again later.');</script>";
-            }
         } else {
-            echo "<script>alert('Student code does not exist.');</script>";
+            $allowed_fields = ['name', 'phone', 'dob', 'email'];
+            $new_value = $_POST["value_$field"] ?? '';
+
+            if (!in_array($field, $allowed_fields)) {
+                $message = "This field cannot be edited.";
+            } else {
+                if ($field === 'email') {
+                    $new_value = strtolower(trim($new_value));
+                    $institute_name = $student['institute_name'];
+
+                    $check_email = $conn->prepare("SELECT * FROM student WHERE email = ? AND institute_name = ? AND stupassword != ?");
+                    $check_email->bind_param("sss", $new_value, $institute_name, $student_code);
+                    $check_email->execute();
+                    $email_result = $check_email->get_result();
+
+                    if ($email_result && $email_result->num_rows > 0) {
+                        $message = "This email already exists under your institute.";
+                    }
+                }
+
+                if (!$message) {
+                    $update_query = "UPDATE student SET $field = ? WHERE stupassword = ?";
+                    $update_stmt = $conn->prepare($update_query);
+                    $update_stmt->bind_param("ss", $new_value, $student_code);
+                    if ($update_stmt->execute()) {
+                        $message = "Student $field updated successfully!";
+                    } else {
+                        $message = "Update failed. Try again later.";
+                    }
+                }
+            }
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,6 +146,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     button:hover {
       background: #0056b3;
     }
+    .message {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
 <body>
@@ -119,19 +159,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <div class="container">
   <h2>Edit Student Detail</h2>
 
+  <?php if (!empty($message)) echo "<div class='message'>" . htmlspecialchars($message) . "</div>"; ?>
+
   <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST" id="edit-form">
     <label for="field-select">Select a field to edit:</label>
-    <select id="field-select" name="field-select">
+    <select id="field-select" name="field-select" required>
       <option value="">-- Choose an option --</option>
       <option value="name">Name</option>
       <option value="phone">Phone Number</option>
       <option value="dob">Date of Birth</option>
       <option value="email">Email</option>
+      <option value="class_year">Class & Year</option>
     </select>
 
     <input type="hidden" name="field" id="field-name">
 
-    <div class="input-group" id="student-code-group">
+    <div class="input-group" id="student-code-group" style="display:block;">
       <label>Enter Student Code:</label>
       <input type="text" name="student_code" required>
     </div>
@@ -156,34 +199,58 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <input type="email" name="value_email">
     </div>
 
+    <div class="input-group" id="input-class_year">
+      <label>Select New Class:</label>
+      <select name="value_class" id="value_class">
+        <option value="">-- Select Class --</option>
+        <option value="class 09">class 09</option>
+        <option value="class 10">class 10</option>
+        <option value="class 11">class 11</option>
+        <option value="class 12">class 12</option>
+        <option value="class 13">class 13</option>
+      </select>
+
+      <label>Enter New Year:</label>
+      <input type="number" name="value_year" id="value_year" min="2024" max="2099" step="1">
+    </div>
+
     <button type="submit" id="submit-btn" style="display:none;">Update Field</button>
   </form>
 </div>
 
 <script>
   const select = document.getElementById('field-select');
-  const groups = document.querySelectorAll('.input-group');
+  const groups = document.querySelectorAll('.input-group:not(#student-code-group)');
   const fieldName = document.getElementById('field-name');
-  const studentCodeGroup = document.getElementById('student-code-group');
   const submitBtn = document.getElementById('submit-btn');
 
   select.addEventListener('change', () => {
     groups.forEach(group => group.style.display = 'none');
     const value = select.value;
 
-    if (value) {  // Show input for any selected field
+    if (value) {
       fieldName.value = value;
-      studentCodeGroup.style.display = 'block';
-
       const selectedInputGroup = document.getElementById('input-' + value);
       if (selectedInputGroup) {
         selectedInputGroup.style.display = 'block';
       }
-
       submitBtn.style.display = 'block';
     } else {
       fieldName.value = '';
       submitBtn.style.display = 'none';
+    }
+  });
+
+  document.getElementById('edit-form').addEventListener('submit', function (e) {
+    const selectedField = select.value;
+    const classValue = document.getElementById('value_class')?.value;
+    const yearValue = document.getElementById('value_year')?.value;
+
+    if (selectedField === 'class_year') {
+      if (!classValue || !yearValue) {
+        alert("You must select both class and year.");
+        e.preventDefault();
+      }
     }
   });
 </script>

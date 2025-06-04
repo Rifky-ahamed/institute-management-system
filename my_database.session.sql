@@ -7,19 +7,19 @@ CREATE TABLE users (
 
 
 CREATE TABLE class (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     class VARCHAR(50) NOT NULL,
     year INT NOT NULL
 );
 
-CREATE TABLE students (
+CREATE TABLE student (
     student_code VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     phone VARCHAR(20),
     dob DATE,
     institute_id INT,
-    class_id INT,
+    class_id INT NULL,
     stupassword VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -33,6 +33,8 @@ CREATE TABLE students (
         ON DELETE SET NULL
 );
 
+
+
 CREATE TABLE activity_log (
     id INT AUTO_INCREMENT PRIMARY KEY,
     activity TEXT NOT NULL,
@@ -42,7 +44,7 @@ CREATE TABLE activity_log (
 
 
 CREATE TABLE subjects(
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     subject VARCHAR(100) NOT NULL
 );
 
@@ -65,8 +67,8 @@ CREATE TABLE teachers (
     number VARCHAR(20),
     dob DATE,
     institute_id INT,
-    class_id INT,
-    subject_id INT,
+    class_id INT NULL,
+    subject_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
@@ -82,6 +84,7 @@ CREATE TABLE teachers (
         ON UPDATE CASCADE
         ON DELETE SET NULL
 );
+
 
 CREATE TABLE schedule (
     id INT AUTO_INCREMENT PRIMARY KEY,

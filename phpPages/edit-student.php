@@ -7,8 +7,17 @@ if (!isset($_SESSION['logged_in'])) {
 include('db_connect.php');
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
+// Step 1: Get institute_id using email from session
+$institute_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$institute_stmt->bind_param("s", $user_email);
+$institute_stmt->execute();
+$institute_result = $institute_stmt->get_result();
 
 $message = '';
+
+if ($institute_result->num_rows > 0) {
+    $institute = $institute_result->fetch_assoc();
+    $institute_id = $institute['id'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $field = $_POST['field'] ?? '';
@@ -31,8 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (!$class || !$year) {
                 $message = "Both class and year must be provided.";
             } else {
-                $check_stmt = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
-                $check_stmt->bind_param("ss", $class, $year);
+                $check_stmt = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ? AND institute_id = ?");
+                $check_stmt->bind_param("ssi", $class, $year, $institute_id);
                 $check_stmt->execute();
                 $check_result = $check_stmt->get_result();
 
@@ -40,8 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $class_row = $check_result->fetch_assoc();
                     $class_id = $class_row['id'];
                 } else {
-                    $insert_stmt = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
-                    $insert_stmt->bind_param("ss", $class, $year);
+                    $insert_stmt = $conn->prepare("INSERT INTO class (class, year, institute_id) VALUES (?, ?, ?)");
+                    $insert_stmt->bind_param("ssi", $class, $year, $institute_id);
                     if ($insert_stmt->execute()) {
                         $class_id = $insert_stmt->insert_id;
                     } else {
@@ -93,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
     }
+}
 }
 ?>
 

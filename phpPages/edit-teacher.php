@@ -9,10 +9,22 @@ if (!isset($_SESSION['logged_in'])) {
 include('db_connect.php');
 // Get current logged-in user's email
 $user_email = $_SESSION['email']; 
+// Step 1: Get institute_id using email from session
+$institute_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$institute_stmt->bind_param("s", $user_email);
+$institute_stmt->execute();
+$institute_result = $institute_stmt->get_result();
+
+$message = '';
+
+if ($institute_result->num_rows > 0) {
+    $institute = $institute_result->fetch_assoc();
+    $institute_id = $institute['id'];
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $field = $_POST['field'];
-    $code = $_POST['student_code'];
+    $code = $_POST['teacher_code'];
 
     if ($field === 'email') {
         $newEmail = $_POST['value_email'];
@@ -23,12 +35,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $result = $checkEmail->get_result();
 
         if ($result->num_rows > 0) {
-            echo "<script>alert('Email already exists!');</script>";
+            $message = "Email already exists! ";
         } else {
             $update = $conn->prepare("UPDATE teachers SET email = ? WHERE teacher_code = ?");
             $update->bind_param("si", $newEmail, $code);
             $update->execute();
-            echo "<script>alert('Email updated successfully');</script>";
+            $message = " Email updated successfully ";
         }
     }
 
@@ -37,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update = $conn->prepare("UPDATE teachers SET name = ? WHERE teacher_code = ?");
         $update->bind_param("si", $name, $code);
         $update->execute();
-        echo "<script>alert('Name updated successfully');</script>";
+        $message = "Name updated successfully ";
     }
 
     elseif ($field === 'phone') {
@@ -45,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update = $conn->prepare("UPDATE teachers SET number = ? WHERE teacher_code = ?");
         $update->bind_param("si", $number, $code);
         $update->execute();
-        echo "<script>alert('Phone number updated successfully');</script>";
+        $message = " Phone number updated successfully ";
     }
 
     elseif ($field === 'dob') {
@@ -53,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update = $conn->prepare("UPDATE teachers SET dob = ? WHERE teacher_code = ?");
         $update->bind_param("si", $dob, $code);
         $update->execute();
-        echo "<script>alert('Date of birth updated successfully');</script>";
+        $message = "Date of birth updated successfully";
     }
 
     elseif ($field === 'subject') {
@@ -69,12 +81,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $update = $conn->prepare("UPDATE teachers SET subject_id = ? WHERE teacher_code = ?");
                 $update->bind_param("ii", $subject_id, $code);
                 $update->execute();
-                echo "<script>alert('Subject updated successfully');</script>";
+                $message =  "Subject updated successfully";
             } else {
-                echo "<script>alert('Subject not found in database.');</script>";
+                $message = "Subject not found in database.";
             }
         } else {
-            echo "<script>alert('Please select a subject.');</script>";
+            $message = "Please select a subject.";
         }
     }
 
@@ -84,8 +96,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (!empty($newClass) && !empty($newYear)) {
             // Step 1: Check if class-year pair exists
-            $stmt = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
-            $stmt->bind_param("ss", $newClass, $newYear);
+            $stmt = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ? AND institute_id = ?");
+            $stmt->bind_param("ssi", $newClass, $newYear, $institute_id);
             $stmt->execute();
             $result = $stmt->get_result();
 
@@ -94,8 +106,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $class_id = $row['id'];
             } else {
                 // Insert new class-year
-                $insert = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
-                $insert->bind_param("ss", $newClass, $newYear);
+                $insert = $conn->prepare("INSERT INTO class (class, year, institute_id) VALUES (?, ?, ?)");
+                $insert->bind_param("ssi", $newClass, $newYear, $institute_id);
                 $insert->execute();
                 $class_id = $insert->insert_id;
             }
@@ -104,11 +116,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update = $conn->prepare("UPDATE teachers SET class_id = ? WHERE teacher_code = ?");
             $update->bind_param("ii", $class_id, $code);
             $update->execute();
-            echo "<script>alert('Class & Year updated successfully');</script>";
+            $message =  "Class & Year updated successfully.";
         } else {
-            echo "<script>alert('Please select both Class and Year.');</script>";
+            $message = "Please select both Class and Year.";
         }
     }
+}
 }
 ?>
 <!DOCTYPE html>
@@ -163,12 +176,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     button:hover {
       background: #0056b3;
     }
+
+    .message {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
   <h2>Edit Teacher Detail</h2>
+
+  <?php if (!empty($message)) echo "<div class='message'>" . htmlspecialchars($message) . "</div>"; ?>
 
   <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST" id="edit-form">
     <label for="field-select">Select a field to edit:</label>
@@ -184,9 +206,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <input type="hidden" name="field" id="field-name">
 
-    <div class="input-group" id="student-code-group">
+    <div class="input-group" id="teacher-code-group">
       <label>Enter Teacher Code:</label>
-      <input type="text" name="student_code" required>
+      <input type="text" name="teacher_code" required>
     </div>
 
     <div class="input-group" id="input-name">
@@ -256,7 +278,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     fieldName.value = selectedField;
 
     if (selectedField) {
-      document.getElementById('student-code-group').style.display = 'block';
+      document.getElementById('teacher-code-group').style.display = 'block';
       const group = document.getElementById('input-' + selectedField);
       if (group) group.style.display = 'block';
       submitBtn.style.display = 'block';

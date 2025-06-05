@@ -5,6 +5,8 @@ if (!isset($_SESSION['logged_in'])) {
     exit();
 }
 include('db_connect.php');
+// Get current logged-in user's email
+$user_email = $_SESSION['email'];
 
 $message = '';
 

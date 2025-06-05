@@ -52,8 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         echo "<script>alert('Email already in use for this institute!');</script>";
     } else {
     // Step 1: Check if the class with the given class and year already exists
-    $stmt_check_class = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
-    $stmt_check_class->bind_param("si", $class, $year);
+    $stmt_check_class = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ? AND institute_id = ?");
+    $stmt_check_class->bind_param("sii", $class, $year, $institute_id);
     $stmt_check_class->execute();
     $result_class = $stmt_check_class->get_result();
 
@@ -63,8 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         $class_id = $row_class['id'];
     } else {
         // Class doesn't exist, insert it
-        $stmt_insert_class = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
-        $stmt_insert_class->bind_param("si", $class, $year);
+        $stmt_insert_class = $conn->prepare("INSERT INTO class (class, year, institute_id) VALUES (?, ?, ?)");
+        $stmt_insert_class->bind_param("sii", $class, $year, $institute_id);
         $stmt_insert_class->execute();
         $class_id = $stmt_insert_class->insert_id;
     }

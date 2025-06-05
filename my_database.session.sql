@@ -12,6 +12,18 @@ CREATE TABLE class (
     year INT NOT NULL
 );
 
+ALTER TABLE class
+ADD COLUMN institute_id INT;
+
+ALTER TABLE class
+ADD CONSTRAINT fk_class_institute
+FOREIGN KEY (institute_id)
+REFERENCES users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
+
 CREATE TABLE student (
     student_code VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,

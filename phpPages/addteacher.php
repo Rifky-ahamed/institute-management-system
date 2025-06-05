@@ -61,8 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $subject_id = $subject_row['id'];
 
     // Check or insert class & year
-    $stmt_class = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ?");
-    $stmt_class->bind_param("ss", $class_name, $year);
+    $stmt_class = $conn->prepare("SELECT id FROM class WHERE class = ? AND year = ? AND institute_id = ?");
+    $stmt_class->bind_param("ssi", $class_name, $year, $institute_id);
     $stmt_class->execute();
     $result_class = $stmt_class->get_result();
     $class_row = $result_class->fetch_assoc();
@@ -70,8 +70,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($class_row) {
         $class_id = $class_row['id'];
     } else {
-        $stmt_insert_class = $conn->prepare("INSERT INTO class (class, year) VALUES (?, ?)");
-        $stmt_insert_class->bind_param("ss", $class_name, $year);
+        $stmt_insert_class = $conn->prepare("INSERT INTO class (class, year, institute_id) VALUES (?, ?, ?)");
+        $stmt_insert_class->bind_param("ssi", $class_name, $year, $institute_id);
         $stmt_insert_class->execute();
         $class_id = $stmt_insert_class->insert_id;
     }

@@ -35,6 +35,9 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $totalTeacers = $row['total_teachers'];
 
+
+
+
 $activities = [];
 $actResult = $conn->query("SELECT activity FROM activity_log ORDER BY created_at DESC LIMIT 5");
 

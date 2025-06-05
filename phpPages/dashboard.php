@@ -35,8 +35,27 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $totalTeacers = $row['total_teachers'];
 
+$query = "
+    SELECT COUNT(*) AS total_classes 
+    FROM class 
+    INNER JOIN users ON class.institute_id = users.id 
+    WHERE users.email = ?
+";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $user_email);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$totalClasses = $row['total_classes'];
 
-
+$query = "
+    SELECT COUNT(*) AS total_subjects FROM subjects;
+";
+$stmt = $conn->prepare($query);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$totalSubjects = $row['total_subjects'];
 
 $activities = [];
 $actResult = $conn->query("SELECT activity FROM activity_log ORDER BY created_at DESC LIMIT 5");
@@ -100,8 +119,8 @@ if ($actResult && $actResult->num_rows > 0) {
     <div class="cards">
       <div class="card"><h3>Total Students</h3><p><?php echo $totalStudents; ?></p></div>
       <div class="card"><h3>Total teachers</h3><p><?php echo $totalTeacers; ?></p></div>
-      <div class="card"><h3>Total Classes</h3><p>15</p></div>
-      <div class="card"><h3>Total Subjects</h3><p>40</p></div>
+      <div class="card"><h3>Total Classes</h3><p><?php echo $totalClasses; ?></p></div>
+      <div class="card"><h3>Total Subjects</h3><p><?php echo $totalSubjects; ?></p></div>
       <div class="card"><h3>Monthly Revenue</h3><p>$12,000.00</p></div>
     </div>
 

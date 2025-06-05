@@ -11,6 +11,7 @@ if (!isset($_SESSION['logged_in'])) {
 include('db_connect.php'); 
 
 $user_email = $_SESSION['email'];
+$theme = $_SESSION['theme'];
 
 $stmt_user = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt_user->bind_param("s", $user_email);
@@ -128,62 +129,162 @@ if ($result_email->num_rows > 0) {
 <head>
   <meta charset="UTF-8">
   <title>Add New Teacher</title>
+  <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f8;
-    padding: 20px;
-  }
+    /* Dark theme CSS */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      padding: 20px;
+      color: #e0e0e0;
+    }
 
-  .form-container {
-    max-width: 500px;
-    margin: auto;
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    }
 
-  h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
 
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #bbb;
+    }
 
-  input[type="text"],
-  input[type="email"],
-  input[type="date"],
-  input[type="tel"],
-  input[type="number"],
-  select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-  }
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="tel"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      box-sizing: border-box;
+      background-color: #2b2b2b;
+      color: #eee;
+    }
 
-  button {
-    width: 100%;
-    background-color: #007BFF;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-  }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="date"]:focus,
+    input[type="tel"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #007BFF;
+      box-shadow: 0 0 5px #007BFF;
+      background-color: #3a3a3a;
+      color: #fff;
+    }
 
-  button:hover {
-    background-color: #0056b3;
-  }
-</style>
+    button {
+      width: 100%;
+      background-color: #007BFF;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+
+  <?php else: ?>
+  <style>
+    /* Light theme CSS */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 20px;
+      color: #000;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #000;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="tel"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      background-color: #fff;
+      color: #000;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="date"]:focus,
+    input[type="tel"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #007BFF;
+      box-shadow: 0 0 5px #007BFF;
+      background-color: #e7f0fe;
+      color: #000;
+    }
+
+    button {
+      width: 100%;
+      background-color: #007BFF;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <?php endif; ?>
 </head>
 <body>
 

@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
   .sidebar a:hover {
     background: #333;
     padding-left: 10px;
-    color: #fff;
+    color: #00adb5;
   }
   .actions button,
   .search-filter button {

@@ -122,7 +122,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
 body {
   font-family: Arial, sans-serif;
-  
   background: #121212; 
   color: #e0e0e0;
   padding: 40px;

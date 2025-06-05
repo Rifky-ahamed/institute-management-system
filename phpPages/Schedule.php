@@ -13,6 +13,7 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
+$theme = $_SESSION['theme'];
 
  // Step 2: Fetch institute ID from users table
     $institute_id = null;
@@ -67,11 +68,141 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <meta charset="UTF-8">
   <title>Class Schedule - Institute Management</title>
   <style>
+  <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
+    /* Dark Mode CSS */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    header {
+      background-color: #1e40af;
+      color: #e0e0e0;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: #1f2937;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #f3f4f6;
+    }
+
+    form {
+      margin-bottom: 30px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .form-row label {
+      width: 150px;
+      font-weight: 500;
+      color: #d1d5db;
+    }
+
+    .form-row select,
+    .form-row input {
+      width: 300px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #374151;
+      background-color: #374151;
+      color: #e5e7eb;
+      box-sizing: border-box;
+    }
+
+    .form-row select option {
+      background-color: #374151;
+      color: #e5e7eb;
+    }
+
+    .form-row button {
+      margin-left: 150px;
+      padding: 10px 20px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-row button:hover {
+      background-color: #1d4ed8;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .form-row label {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+
+      .form-row select,
+      .form-row input,
+      .form-row button {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #1f2937;
+      color: #e5e7eb;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #374151;
+      text-align: center;
+    }
+
+    th {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #374151;
+    }
+
+    @media (max-width: 768px) {
+      .form-group {
+        flex-direction: column;
+      }
+    }
+
+  <?php else: ?>
+    /* Light Mode CSS */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f2f2f2;
+      color: #000;
     }
 
     header {
@@ -93,64 +224,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     h2 {
       text-align: center;
       margin-bottom: 20px;
+      color: #000;
     }
 
     form {
-  margin-bottom: 30px;
-}
+      margin-bottom: 30px;
+    }
 
-.form-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
 
-.form-row label {
-  width: 150px;
-  font-weight: 500;
-}
+    .form-row label {
+      width: 150px;
+      font-weight: 500;
+      color: #000;
+    }
 
-.form-row select,
-.form-row input {
-  width: 300px;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
+    .form-row select,
+    .form-row input {
+      width: 300px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      background-color: white;
+      color: #000;
+    }
 
-.form-row button {
-  margin-left: 150px;
-  padding: 10px 20px;
-  background-color: #2d6cdf;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+    .form-row button {
+      margin-left: 150px;
+      padding: 10px 20px;
+      background-color: #2d6cdf;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-@media (max-width: 768px) {
-  .form-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
 
-  .form-row label {
-    width: 100%;
-    margin-bottom: 5px;
-  }
+      .form-row label {
+        width: 100%;
+        margin-bottom: 5px;
+      }
 
-  .form-row select,
-  .form-row input,
-  .form-row button {
-    width: 100%;
-    margin-left: 0;
-  }
-}
+      .form-row select,
+      .form-row input,
+      .form-row button {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      background-color: white;
+      color: #000;
     }
 
     th, td {
@@ -173,6 +310,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         flex-direction: column;
       }
     }
+  <?php endif; ?>
   </style>
 </head>
 <body>

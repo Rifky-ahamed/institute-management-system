@@ -13,6 +13,7 @@ include 'db_connect.php';
 
 // Get current logged-in institute's email
 $institute_email = $_SESSION['email'];
+$theme = $_SESSION['theme'];
 
 // Step 1: Get user id and name from users table
 $query_user = "SELECT id, name FROM users WHERE email = ?";
@@ -43,37 +44,74 @@ if ($result_user->num_rows > 0) {
 <html>
 <head>
     <title>teacher of <?php echo htmlspecialchars($institute_name); ?></title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f7;
-            padding: 30px;
-        }
-        h2 {
-            color: #333;
-        }
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 12px 15px;
-            text-align: left;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #eef;
-        }
+     <style>
+        <?php if (isset($theme) && $theme === 'dark'): ?>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #121212; /* very dark background */
+                padding: 30px;
+                color: #e0e0e0; /* light text */
+            }
+            h2 {
+                color: #f0f0f0; /* lighter heading */
+            }
+            table {
+                border-collapse: collapse;
+                width: 80%;
+                margin-top: 20px;
+                background-color: #1e1e1e; /* dark table background */
+                box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            }
+            th, td {
+                border: 1px solid #333;
+                padding: 12px 15px;
+                text-align: left;
+                color: #e0e0e0; /* light text */
+            }
+            th {
+                background-color: #0056b3; /* darkish blue */
+                color: #fff;
+            }
+            tr:nth-child(even) {
+                background-color: #2a2a2a; /* slightly lighter dark */
+            }
+            tr:hover {
+                background-color: #003a75; /* dark blue hover */
+            }
+        <?php else: ?>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f2f5f7;
+                padding: 30px;
+                color: #000;
+            }
+            h2 {
+                color: #333;
+            }
+            table {
+                border-collapse: collapse;
+                width: 80%;
+                margin-top: 20px;
+                background-color: #fff;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            th, td {
+                border: 1px solid #ccc;
+                padding: 12px 15px;
+                text-align: left;
+                color: #000;
+            }
+            th {
+                background-color: #007bff;
+                color: white;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            tr:hover {
+                background-color: #eef;
+            }
+        <?php endif; ?>
     </style>
 </head>
 <body>

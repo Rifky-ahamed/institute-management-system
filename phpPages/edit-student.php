@@ -10,6 +10,9 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
+$theme = $_SESSION['theme'] ;
+
+
 // Step 1: Get institute_id using email from session
 $institute_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $institute_stmt->bind_param("s", $user_email);
@@ -115,59 +118,146 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8">
   <title>Edit Student</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f6f8;
-      padding: 40px;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin: 10px 0 5px;
-    }
-    select, input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .input-group {
-      display: none;
-    }
-    button {
-      width: 100%;
-      background: #007bff;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .message {
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: bold;
-      color: green;
-    }
-  </style>
+       <style>
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
+body {
+  font-family: Arial, sans-serif;
+  
+  background: #121212; 
+  color: #e0e0e0;
+  padding: 40px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: #1e1e1e; /* dark background for the form */
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+h2 {
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin: 10px 0 5px;
+  color: #cfcfcf;
+}
+
+select, input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background-color: #2c2c2c;
+  color: #e0e0e0;
+  transition: border-color 0.3s ease;
+}
+
+select:focus, input:focus {
+  border-color: #007bff;
+  outline: none;
+  background-color: #3a3a3a;
+}
+
+.input-group {
+  display: none;
+}
+
+button {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+.message {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #90ee90; /* light green */
+}
+
+<?php else: ?>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f6f8;  /* light background for the whole page */
+  padding: 40px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: white; /* white form background */
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin: 10px 0 5px;
+}
+
+select, input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.input-group {
+  display: none;
+}
+
+button {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+.message {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: green;
+}
+<?php endif; ?>
+</style>
+
 </head>
 <body>
 

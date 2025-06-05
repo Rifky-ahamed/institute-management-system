@@ -12,6 +12,7 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
+$theme = $_SESSION['theme'] ;
 $query = "
     SELECT COUNT(*) AS total_students 
     FROM student 
@@ -70,38 +71,155 @@ if ($actResult && $actResult->num_rows > 0) {
 }
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head> 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard - Institute Class Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
-    .sidebar { width: 200px; background: #2c3e50; color: #fff; height: 100vh; position: fixed; padding: 20px; }
-    .sidebar h2 { text-align: center; margin-bottom: 30px; }
-    .sidebar a { display: block; color: #ecf0f1; text-decoration: none; margin: 15px 0; }
-    .sidebar a:hover { background: #34495e; padding-left: 10px; }
-    .main { margin-left: 270px; padding: 20px; }
-    .cards { display: flex; flex-wrap: wrap; gap: 20px; }
-    .card { flex: 1 1 200px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .section { margin-top: 40px; }
-    .section h3 { margin-bottom: 10px; }
-    .actions button { padding: 10px 15px; margin: 5px; background: #2980b9; color: #fff; border: none; border-radius: 5px; }
-    .actions button:hover { background: #3498db; }
-    .chart-placeholder, .calendar, .log, .announcements { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-      ul {
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+  }
+
+  .sidebar {
+    width: 200px;
+    background: #1f1f1f;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    padding: 20px;
+  }
+
+  .sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #00adb5;
+  }
+
+  .sidebar a {
+    display: block;
+    color: #ccc;
+    text-decoration: none;
+    margin: 15px 0;
+    transition: padding-left 0.3s, background 0.3s;
+  }
+
+  .sidebar a:hover {
+    background: #2a2a2a;
+    padding-left: 10px;
+    color: #00adb5;
+  }
+
+  .main {
+    margin-left: 270px;
+    padding: 20px;
+  }
+
+  .card, .chart-placeholder, .calendar, .log, .announcements {
+    background: #1e1e1e;
+    color: #ddd;
+  }
+
+  .card {
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  }
+
+  ul li::before {
+    color: #00ff99;
+  }
+
+<?php else: ?>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+  }
+
+  .sidebar {
+    width: 200px;
+    background: #2c3e50;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    padding: 20px;
+  }
+
+  .sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .sidebar a {
+    display: block;
+    color: #ecf0f1;
+    text-decoration: none;
+    margin: 15px 0;
+  }
+
+  .sidebar a:hover {
+    background: #34495e;
+    padding-left: 10px;
+  }
+
+  .main {
+    margin-left: 270px;
+    padding: 20px;
+  }
+
+  .card, .chart-placeholder, .calendar, .log, .announcements {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  ul li::before {
+    color: green;
+  }
+
+<?php endif; ?>
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .card {
+    flex: 1 1 200px;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .section {
+    margin-top: 40px;
+  }
+
+  .actions button {
+    padding: 10px 15px;
+    margin: 5px;
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+  }
+
+  .actions button:hover {
+    background: #3498db;
+  }
+
+  ul {
     list-style: none;
     padding-left: 0;
   }
-  ul li::before {
-    content: "➤ ";
-    color: green;
-    font-weight: bold;
-    margin-right: 8px;
-  }
-  </style>
+</style>
+
 </head>
 <body>
   <div class="sidebar">

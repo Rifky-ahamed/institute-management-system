@@ -147,9 +147,10 @@ $theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'light';
 
       <label for="theme">Theme:</label>
       <select id="theme" name="theme">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
+  <option value="light" <?php if ($theme === 'light') echo 'selected'; ?>>Light</option>
+  <option value="dark" <?php if ($theme === 'dark') echo 'selected'; ?>>Dark</option>
+</select>
+
 
       <button type="submit">Save Changes</button>
     </form>

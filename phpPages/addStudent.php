@@ -12,6 +12,7 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
+$theme = $_SESSION['theme'] ;
 
 // Fetch the user's id (institute_id) from users table using email
 $stmt_user = $conn->prepare("SELECT id FROM users WHERE email = ?");
@@ -105,86 +106,188 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
   <title>Add New Student</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-    }
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    margin: 0;
+    padding: 0;
+    color: #e0e0e0;
+  }
 
-    .container {
-      width: 90%;
-      max-width: 600px;
-      margin: 50px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+  .container {
+    width: 90%;
+    max-width: 600px;
+    margin: 50px auto;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #2c3e50;
-    }
+  h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #ffffff;
+  }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+  .form-group {
+    margin-bottom: 20px;
+  }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #333;
-    }
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cccccc;
+  }
 
-    input, select {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #444;
+    border-radius: 6px;
+  }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background: #2980b9;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+  input:focus, select:focus {
+    outline: none;
+    border-color: #5c9ded;
+    box-shadow: 0 0 5px #5c9ded;
+  }
 
-    button:hover {
-      background: #3498db;
-    }
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background: #1e88e5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 15px;
-      text-decoration: none;
-      color: #2980b9;
-    }
+  button:hover {
+    background: #42a5f5;
+  }
 
-    .back-link:hover {
-      text-decoration: underline;
-    }
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    text-decoration: none;
+    color: #90caf9;
+  }
 
-    .form-group-row {
-      display: flex;
-      gap: 20px;
-      align-items: flex-end;
-    }
+  .back-link:hover {
+    text-decoration: underline;
+    color: #bbdefb;
+  }
 
-    .form-group {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-  </style>
+  .form-group-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+  }
+
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Success message box */
+  div[style*="background:#e9f7ef"] {
+    background: #2e7d32 !important;
+    color: #ffffff;
+    border: 1px solid #66bb6a;
+  }
+
+<?php else: ?>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #2c3e50;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #3498db;
+  }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    text-decoration: none;
+    color: #2980b9;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  .form-group-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+  }
+
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+<?php endif; ?>
+</style>
+
 </head>
 <body>
   <div class="container">

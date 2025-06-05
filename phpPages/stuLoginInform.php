@@ -13,6 +13,7 @@ include 'db_connect.php';
 
 // Get current logged-in institute's email
 $institute_email = $_SESSION['email'];
+$theme = $_SESSION['theme'] ;
 
 // Step 1: Get user id and name from users table
 $query_user = "SELECT id, name FROM users WHERE email = ?";
@@ -44,37 +45,84 @@ if ($result_user->num_rows > 0) {
 <head>
     <title>Students of <?php echo htmlspecialchars($institute_name); ?></title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f5f7;
-            padding: 30px;
-        }
-        h2 {
-            color: #333;
-        }
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 12px 15px;
-            text-align: left;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #eef;
-        }
-    </style>
+    <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        padding: 30px;
+    }
+
+    h2 {
+        color: #f5f5f5;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 80%;
+        margin-top: 20px;
+        background-color: #1e1e1e;
+        box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+    }
+
+    th, td {
+        border: 1px solid #444;
+        padding: 12px 15px;
+        text-align: left;
+        color: #ccc;
+    }
+
+    th {
+        background-color: #3a76d2;  /* A bluish dark header */
+        color: #fff;
+    }
+
+    tr:nth-child(even) {
+        background-color: #2a2a2a;
+    }
+
+    tr:hover {
+        background-color: #3b5998; /* A softer blue hover */
+        color: #fff;
+    }
+
+    <?php else: ?>
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f5f7;
+        padding: 30px;
+    }
+    h2 {
+        color: #333;
+    }
+    table {
+        border-collapse: collapse;
+        width: 80%;
+        margin-top: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 12px 15px;
+        text-align: left;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #eef;
+    }
+
+    <?php endif; ?>
+</style>
+
 </head>
 <body>
 

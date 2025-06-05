@@ -12,7 +12,7 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
-
+$theme = $_SESSION['theme'] ;
 // Fetch the user's id (institute_id) from users table using email
 $query_user = "SELECT id FROM users WHERE email = ?";
 $stmt = $conn->prepare($query_user);
@@ -89,87 +89,179 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
   <title>Manage Students - Admin Panel</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f4f4f4;
-    }
-    .container {
-      padding: 20px;
-      margin-left: 250px;
-    }
-    .sidebar {
-      width: 200px;
-      background: #2c3e50;
-      color: #fff;
-      height: 100vh;
-      position: fixed;
-      padding: 20px;
-    }
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .sidebar a {
-      display: block;
-      color: #ecf0f1;
-      text-decoration: none;
-      margin: 15px 0;
-    }
-    .sidebar a:hover {
-      background: #34495e;
-      padding-left: 10px;
-    }
-    h1 {
-      margin-bottom: 20px;
-    }
-    .actions {
-      margin-bottom: 20px;
-    }
-    .actions button {
-      padding: 10px 15px;
-      background: #2980b9;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin-right: 10px;
-    }
-    .actions button:hover {
-      background: #3498db;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #2980b9;
-      color: white;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    .search-filter {
-      margin-bottom: 20px;
-    }
-    .search-filter input, .search-filter select {
-      padding: 8px;
-      margin-right: 10px;
-    }
-    .search-filter input {
-      width: 205px;
-    }
-    #student_year {
-      width: 100px;
-    }
-  </style>
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  .container {
+    padding: 20px;
+    margin-left: 250px;
+  }
+  .sidebar {
+    width: 200px;
+    background: #1f1f1f;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    padding: 20px;
+  }
+  .sidebar h2, .sidebar a {
+    color: #bbb;
+  }
+  .sidebar a:hover {
+    background: #333;
+    padding-left: 10px;
+    color: #fff;
+  }
+  .actions button,
+  .search-filter button {
+    background: #3b82f6;
+    color: white;
+  }
+  .actions button:hover,
+  .search-filter button:hover {
+    background: #60a5fa;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  th {
+    background-color: #2d2d2d;
+    color: #ffffff;
+  }
+  td, th {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+  }
+  tr:hover {
+    background-color: #2a2a2a;
+  }
+  .search-filter input,
+  .search-filter select {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #444;
+  }
+  .search-filter input::placeholder {
+    color: #888;
+  }
+  button[name="delete_student"] {
+    background-color: #e74c3c;
+  }
+  button[name="delete_student"]:hover {
+    background-color: #c0392b;
+  }
+<?php else: ?>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  .container {
+    padding: 20px;
+    margin-left: 250px;
+  }
+  .sidebar {
+    width: 200px;
+    background: #2c3e50;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    padding: 20px;
+  }
+  .sidebar h2, .sidebar a {
+    color: #ecf0f1;
+  }
+  .sidebar a:hover {
+    background: #34495e;
+    padding-left: 10px;
+  }
+  .actions button,
+  .search-filter button {
+    background: #2980b9;
+    color: white;
+  }
+  .actions button:hover,
+  .search-filter button:hover {
+    background: #3498db;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  th {
+    background-color: #2980b9;
+    color: white;
+  }
+  td, th {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  .search-filter input,
+  .search-filter select {
+    padding: 8px;
+    margin-right: 10px;
+  }
+  .search-filter input {
+    width: 205px;
+  }
+  button[name="delete_student"] {
+    background-color: #e74c3c;
+    color: white;
+  }
+  button[name="delete_student"]:hover {
+    background-color: #c0392b;
+  }
+<?php endif; ?>
+  #student_year {
+    width: 100px;
+  }
+  .sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .sidebar a {
+    display: block;
+    text-decoration: none;
+    margin: 15px 0;
+    transition: background 0.3s, padding-left 0.3s;
+  }
+  .actions {
+    margin-bottom: 20px;
+  }
+  .actions button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+  .search-filter {
+    margin-bottom: 20px;
+  }
+  .search-filter input,
+  .search-filter select {
+    padding: 8px;
+    margin-right: 10px;
+    border-radius: 4px;
+  }
+</style>
+
 </head>
 <body>
 

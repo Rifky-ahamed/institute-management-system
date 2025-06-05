@@ -1,11 +1,13 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['logged_in'])) {
     header("Location: log.php");
     exit();
 }
 include('db_connect.php');
-
+ 
 $user_email = $_SESSION['email'];
 
 $query_user = "SELECT id FROM users WHERE email = ?";

@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['logged_in'])) {
     header("Location: log.php");
@@ -7,6 +9,7 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 include('db_connect.php'); 
+
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
 $query = "
@@ -110,7 +113,7 @@ if ($actResult && $actResult->num_rows > 0) {
     <a href="#"><i class="fa fa-check-square"></i> Attendance</a>
     <a href="#"><i class="fa fa-money-bill-wave"></i> Payments</a>
     <a href="#"><i class="fa fa-bell"></i> Notifications</a>
-    <a href="#"><i class="fa fa-cog"></i> Settings</a>
+    <a href="setting.php"><i class="fa fa-cog"></i> Settings</a>
   </div>
 
   <div class="main">

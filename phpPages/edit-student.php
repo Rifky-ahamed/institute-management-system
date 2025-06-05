@@ -1,10 +1,13 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['logged_in'])) {
     header("Location: log.php");
     exit();
 }
 include('db_connect.php');
+
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
 // Step 1: Get institute_id using email from session

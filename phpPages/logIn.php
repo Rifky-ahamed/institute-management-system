@@ -1,5 +1,7 @@
 <?php
-session_start(); // ✅ Required for session variables
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+} // ✅ Required for session variables
 
 include 'db_connect.php';
 

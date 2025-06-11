@@ -9,7 +9,8 @@ if (!isset($_SESSION['logged_in'])) {
 include('db_connect.php');
 
 $user_email = $_SESSION['email'];
-$theme = $_SESSION['theme'];
+$theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
+
 $query_user = "SELECT id FROM users WHERE email = ?";
 $stmt_user = $conn->prepare($query_user);
 $stmt_user->bind_param("s", $user_email);

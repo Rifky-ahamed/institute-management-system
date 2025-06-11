@@ -12,7 +12,8 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
-$theme = $_SESSION['theme'] ;
+$theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
+
 // Fetch the user's id (institute_id) from users table using email
 $query_user = "SELECT id FROM users WHERE email = ?";
 $stmt = $conn->prepare($query_user);

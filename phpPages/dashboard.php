@@ -12,7 +12,8 @@ include('db_connect.php');
 
 // Get current logged-in user's email
 $user_email = $_SESSION['email'];
-$theme = $_SESSION['theme'] ;
+$theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
+
 $query = "
     SELECT COUNT(*) AS total_students 
     FROM student 

@@ -1,0 +1,177 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+ 
+if (!isset($_SESSION['logged_in'])) {
+    header("Location: log.php");
+    exit();
+}
+
+include('db_connect.php'); 
+
+// Get current logged-in user's email
+$user_email = $_SESSION['email'];
+$theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
+
+// Fetch user ID
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$stmt->bind_param("s", $user_email);
+$stmt->execute();
+$stmt->bind_result($institute_id);
+$stmt->fetch();
+$stmt->close();
+
+// Fetch subjects 
+$subject_result = $conn->query("SELECT id, subject FROM subjects");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $student_code = trim($_POST['student_code']);
+    $subjects = $_POST['subjects'] ?? [];
+
+    if (empty($subjects)) {
+        echo "<script>alert('Please select at least one subject.');</script>";
+        exit;
+    }
+
+
+    
+   $stmt = $conn->prepare("SELECT student_code FROM student WHERE stupassword = ? AND institute_id = ?");
+    $stmt->bind_param("si", $student_code, $institute_id);
+    $stmt->execute();
+    $stmt->bind_result($fetched_code);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (!$fetched_code) {
+    echo "<script>alert('Student does not exist in your institute.');</script>";
+    exit;
+    }
+
+    $inserted = 0;
+    $skipped = 0;
+
+    foreach ($subjects as $subject_id) {
+        // Step 2: Check if already assigned
+        $check = $conn->prepare("SELECT id FROM assignsubjects WHERE student_code = ? AND sub_id = ?");
+        $check->bind_param("si", $student_code, $subject_id);
+        $check->execute();
+        $check->store_result();
+
+        if ($check->num_rows > 0) {
+            $skipped++;
+        } else {
+            // Insert new assignment
+            $insert = $conn->prepare("INSERT INTO assignsubjects (student_code, sub_id) VALUES (?, ?)");
+            $insert->bind_param("si", $student_code, $subject_id);
+            $insert->execute();
+            $inserted++;
+            $insert->close();
+        }
+
+        $check->close();
+    }
+
+    echo "<script>alert('Subjects Assigned: $inserted, Skipped (Already Exist): $skipped');</script>";
+}
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Student to Subject - Institute Class Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      padding-top: 40px;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      width: 600px;
+      max-width: 90%;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-group {
+      margin-bottom: 20px;
+    }
+
+    .checkbox-group label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2471a3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2><i class="fas fa-user-plus"></i> Add Student to Subject</h2>
+    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+      <label for="student_code">Student Code:</label>
+      <input type="text" id="student_code" name="student_code" required />
+
+      <label>Select Subjects:</label>
+      <div class="checkbox-group">
+        <?php while ($subject = $subject_result->fetch_assoc()): ?>
+          <label>
+            <input type="checkbox" name="subjects[]" value="<?php echo $subject['id']; ?>" />
+            <?php echo htmlspecialchars($subject['subject']); ?>
+          </label>
+        <?php endwhile; ?>
+      </div>
+
+      <button type="submit"><i class="fas fa-save"></i> Assign Subjects</button>
+    </form>
+  </div>
+</body>
+</html>

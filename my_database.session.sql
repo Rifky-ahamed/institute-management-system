@@ -32,7 +32,7 @@ CREATE TABLE student (
     dob DATE,
     institute_id INT,
     class_id INT NULL,
-    stupassword VARCHAR(255) NOT NULL,
+    stupassword VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
@@ -118,4 +118,19 @@ ADD CONSTRAINT fk_institute
 FOREIGN KEY (institute_id) REFERENCES users(id)
 ON UPDATE CASCADE
 ON DELETE CASCADE;
+
+
+
+CREATE TABLE assignSubjects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_code VARCHAR(50) NOT NULL,
+    sub_id INT DEFAULT NULL,
+    FOREIGN KEY (student_code) REFERENCES student(stupassword)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (sub_id) REFERENCES subjects(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
 

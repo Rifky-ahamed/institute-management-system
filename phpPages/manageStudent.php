@@ -281,6 +281,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_student'])) {
     <button onclick="window.location.href='addStudent.php';">Add New Student</button>
     <button onclick="window.location.href='stuLoginInform.php';">View Student Login Information</button>
     <button onclick="window.location.href='edit-student.php';">Edit Student Information</button>
+    <button onclick="window.location.href='addStudentToSubject.php';">Add The Student To Subjects</button>
   </div>
 
   <div class="search-filter">

@@ -231,7 +231,6 @@ if ($actResult && $actResult->num_rows > 0) {
     <a href="Schedule.php"><i class="fa fa-calendar-alt"></i> Schedule</a>
     <a href="attendance.php"><i class="fa fa-check-square"></i> Attendance</a>
     <a href="#"><i class="fa fa-money-bill-wave"></i> Payments</a>
-    <a href="#"><i class="fa fa-bell"></i> Notifications</a>
     <a href="setting.php"><i class="fa fa-cog"></i> Settings</a>
   </div>
 

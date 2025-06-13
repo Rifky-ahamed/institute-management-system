@@ -13,13 +13,18 @@ include('db_connect.php');
 // Get current user's email
 $user_email = $_SESSION['email'];
 
-// Get class_id from URL
-if (!isset($_GET['class_id']) || empty($_GET['class_id'])) {
+// Determine class_id based on request method
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $class_id = isset($_POST['class_id']) ? intval($_POST['class_id']) : 0;
+} else {
+    $class_id = isset($_GET['class_id']) ? intval($_GET['class_id']) : 0;
+}
+
+if ($class_id === 0) {
     echo "No class selected.";
     exit;
 }
 
-$class_id = intval($_GET['class_id']);
 
 // Get the institute_id of current user
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
@@ -28,6 +33,75 @@ $stmt->execute();
 $stmt->bind_result($institute_id);
 $stmt->fetch();
 $stmt->close();
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+     if (isset($_POST['submit_attendance'])) {
+    $class_id = intval($_POST['class_id']);
+    $subject_id = intval($_POST['subject_id']);
+    $attendance = $_POST['attendance']; // Array: student_code => status
+
+    // Fetch class name and year using class_id
+    $stmt = $conn->prepare("SELECT class, year FROM class WHERE id = ? AND institute_id = ?");
+    $stmt->bind_param("ii", $class_id, $institute_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if (!$class_data = $result->fetch_assoc()) {
+        echo "Invalid class selected.";
+        exit;
+    }
+    $class = $class_data['class'];
+    $year = $class_data['year'];
+    $stmt->close();
+
+    // Get subject name by subject_id
+    $sub_stmt = $conn->prepare("SELECT subject FROM subjects WHERE id = ?");
+    $sub_stmt->bind_param("i", $subject_id);
+    $sub_stmt->execute();
+    $sub_result = $sub_stmt->get_result();
+    $subject_row = $sub_result->fetch_assoc();
+    $subject_name = $subject_row['subject'] ?? 'Unknown';
+    $sub_stmt->close();
+
+    $today_date = date('Y-m-d');
+
+    // Prepare statements for check and insert/update using attendance_date column
+    $check_stmt = $conn->prepare("SELECT id FROM attendance WHERE student_code = ? AND subject = ? AND attendance_date = ?");
+    $update_stmt = $conn->prepare("UPDATE attendance SET status = ? WHERE id = ?");
+    $insert_stmt = $conn->prepare("INSERT INTO attendance (status, institute_id, student_code, class, year, subject, attendance_date) VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+    foreach ($attendance as $student_code => $status) {
+        $status = strtolower($status) === 'present' ? 'Present' : 'Absent';
+
+        // Check if attendance record exists for this student, subject, attendance_date
+        $check_stmt->bind_param("sss", $student_code, $subject_name, $today_date);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+
+        if ($check_result->num_rows > 0) {
+            // Record exists, update status
+            $row = $check_result->fetch_assoc();
+            $attendance_id = $row['id'];
+            $update_stmt->bind_param("si", $status, $attendance_id);
+            $update_stmt->execute();
+        } else {
+            // Insert new record
+            $insert_stmt->bind_param("sisssss", $status, $institute_id, $student_code, $class, $year, $subject_name, $today_date);
+            $insert_stmt->execute();
+        }
+    }
+
+    // Close statements
+    $check_stmt->close();
+    $update_stmt->close();
+    $insert_stmt->close();
+
+    echo "<script>alert('Attendance successfully submitted!'); window.location.href='attendanceMarking.php?class_id=$class_id&subject_id=$subject_id';</script>";
+    exit();
+} else {
+    echo "Invalid submission.";
+}
+}
+
+
 
 // Get class name and year
 $stmt = $conn->prepare("SELECT class, year FROM class WHERE id = ? AND institute_id = ?");
@@ -137,7 +211,7 @@ if (isset($_GET['subject_id']) && !empty($_GET['subject_id'])):
 ?>
 
 <!-- Attendance form -->
-<form action="submit_attendance.php" method="POST">
+<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
     <input type="hidden" name="class_id" value="<?php echo $class_id; ?>">
     <input type="hidden" name="subject_id" value="<?php echo $subject_id; ?>">
 

@@ -133,4 +133,26 @@ CREATE TABLE assignSubjects (
         ON UPDATE CASCADE
 );
 
+CREATE TABLE attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    status ENUM('Present', 'Absent') NOT NULL,
+    institute_id INT NOT NULL,
+    student_code VARCHAR(50) NOT NULL,
+    class VARCHAR(50) NOT NULL,
+    year VARCHAR(10) NOT NULL,
+    FOREIGN KEY (institute_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (student_code) REFERENCES student(stupassword)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+ALTER TABLE attendance
+ADD COLUMN attendance_date DATE NOT NULL DEFAULT CURRENT_DATE;
+
+ALTER TABLE attendance ADD COLUMN subject VARCHAR(255) NOT NULL;
+
+
+
 

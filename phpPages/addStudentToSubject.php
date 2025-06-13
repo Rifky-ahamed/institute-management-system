@@ -85,73 +85,152 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <title>Add Student to Subject - Institute Class Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      padding-top: 40px;
-    }
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212; 
+    color: #e0e0e0;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+  }
 
-    .container {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      width: 600px;
-      max-width: 90%;
-    }
+  .container {
+    max-width: 600px;
+    width: 100%;
+    background: #1e1e1e;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #333;
-    }
+  h2 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+  }
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-    }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #cfcfcf;
+  }
 
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 20px;
-    }
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #444;
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
 
-    .checkbox-group {
-      margin-bottom: 20px;
-    }
+  .checkbox-group {
+    margin-bottom: 20px;
+  }
 
-    .checkbox-group label {
-      display: block;
-      margin-bottom: 10px;
-    }
+  .checkbox-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #cccccc;
+  }
 
-    .checkbox-group input[type="checkbox"] {
-      margin-right: 10px;
-    }
+  .checkbox-group input[type="checkbox"] {
+    margin-right: 10px;
+    accent-color: #3498db;
+  }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #2980b9;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+  }
 
-    button:hover {
-      background-color: #2471a3;
-    }
-  </style>
+  button:hover {
+    background-color: #2980b9;
+  }
+
+<?php else: ?>
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+  }
+
+  .container {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    max-width: 90%;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .checkbox-group {
+    margin-bottom: 20px;
+  }
+
+  .checkbox-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    margin-right: 10px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #2471a3;
+  }
+
+<?php endif; ?>
+</style>
+
 </head>
 <body>
   <div class="container">

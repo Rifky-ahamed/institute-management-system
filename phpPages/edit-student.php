@@ -119,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8">
   <title>Edit Student</title>
   <style>
-       <style>
+       
 <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
 body {
   font-family: Arial, sans-serif;

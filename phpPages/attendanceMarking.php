@@ -125,50 +125,141 @@ $stmt->close();
     <meta charset="UTF-8" />
     <title>Attendance Marking - <?php echo $class_name . " " . $class_year; ?></title>
     <style>
-        body {
-            font-family: Arial;
-            background: #f9f9f9;
-            padding: 40px;
-        }
-        h2 {
-            color: #333;
-        }
-        form {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        button {
-            margin-top: 20px;
-            padding: 12px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        select, option {
-            padding: 8px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-        }
-    </style>
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
+    body {
+        font-family: Arial, sans-serif;
+        background: #121212;
+        color: #e0e0e0;
+        padding: 40px;
+    }
+
+    h2 {
+        color: #ffffff;
+    }
+
+    form {
+        background: #1e1e1e;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+    }
+
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #444;
+        text-align: left;
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+
+    th {
+        background-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 12px 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #218838;
+    }
+
+    select, option {
+        padding: 8px;
+        background-color: #2c2c2c;
+        color: #ffffff;
+        border: 1px solid #555;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        color: #cccccc;
+    }
+
+<?php else: ?>
+
+    body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        padding: 40px;
+        color: #333;
+    }
+
+    h2 {
+        color: #333;
+    }
+
+    form {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ccc;
+        text-align: left;
+    }
+
+    th {
+        background-color: #e8f0fe;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 12px 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #218838;
+    }
+
+    select, option {
+        padding: 8px;
+        background-color: #ffffff;
+        color: #333333;
+        border: 1px solid #ccc;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+    }
+
+<?php endif; ?>
+</style>
+
 </head>
 <body>
 

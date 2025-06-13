@@ -24,88 +24,180 @@ $theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;   
-            padding-top: 40px; 
-        }
+<?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+    padding-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+  }
 
-        .attendance-container {
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            width: 600px;
-            max-width: 90%;
-        }
+  .attendance-container {
+    background: #1e1e1e;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+    width: 600px;
+    max-width: 90%;
+  }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #333;
-        }
+  h2 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+  }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #cfcfcf;
+  }
 
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
+  select {
+    width: 100%;
+    padding: 10px;
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            display: none;
-        }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    display: none;
+  }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
+  th, td {
+    border: 1px solid #444;
+    padding: 12px;
+    text-align: left;
+  }
 
-        th {
-            background-color: #007bff;
-            color: white;
-        }
+  th {
+    background-color: #0d6efd;
+    color: white;
+  }
 
-        .status-options {
-            display: flex;
-            gap: 10px;
-        }
+  td {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+  }
 
-        button {
-            margin-top: 20px;
-            padding: 12px 20px;
-            background-color: #28a745;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: none;
-        }
+  .status-options {
+    display: flex;
+    gap: 10px;
+  }
 
-        button:hover {
-            background-color: #218838;
-        }
-    </style>
+  button {
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: none;
+  }
+
+  button:hover {
+    background-color: #218838;
+  }
+
+<?php else: ?>
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    padding-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+  }
+
+  .attendance-container {
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    max-width: 90%;
+  }
+
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    display: none;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .status-options {
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: none;
+  }
+
+  button:hover {
+    background-color: #218838;
+  }
+
+<?php endif; ?>
+</style>
+
 </head>
 <body>
     <div class="attendance-container">

@@ -26,11 +26,14 @@ if ($row_user = $result_user->fetch_assoc()) {
     $subject = $_GET['subject'] ?? '';
 
     $query = "
-        SELECT teachers.*, subjects.subject, class.class AS class, class.year
+        SELECT teachers.*, class.class AS class, class.year,
+               GROUP_CONCAT(subjects.subject SEPARATOR ', ') AS subject
         FROM teachers
-        JOIN subjects ON teachers.subject_id = subjects.id
         JOIN class ON teachers.class_id = class.id
-        WHERE teachers.institute_id = ?";
+        LEFT JOIN assignsubjectstoteacher ON teachers.teacher_code = assignsubjectstoteacher.teacher_code
+        LEFT JOIN subjects ON assignsubjectstoteacher.sub_id = subjects.id
+        WHERE teachers.institute_id = ?
+    ";
 
     $params = [$institute_id];
     $types = "i";
@@ -57,10 +60,19 @@ if ($row_user = $result_user->fetch_assoc()) {
         $types .= "s";
     }
 
+    // Group by teacher_code to avoid duplication
+    $query .= " GROUP BY teachers.teacher_code";
+
+    // Prepare and execute the final query
     $stmt = $conn->prepare($query);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    if ($stmt) {
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    } else {
+        echo "Query prepare failed: " . $conn->error;
+        $result = false;
+    }
 } else {
     $result = false;
 }
@@ -79,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_teacher'])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,6 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_teacher'])) {
       <button onclick="window.location.href='addteacher.php';">Add New Teacher</button>
       <button onclick="window.location.href='teacLoginInform.php';">View Teacher Login Info</button>
       <button onclick="window.location.href='edit-teacher.php';">Edit Teacher Info</button>
+      <button onclick="window.location.href='addTeacherToSubject.php';">Add The teacher To Subjects</button>
     </div>
     <div class="search-filter">
       <form method="GET">

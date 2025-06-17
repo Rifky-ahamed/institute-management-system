@@ -49,16 +49,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $teacher_row = mysqli_fetch_assoc($teacher_result);
         $teacher_name = $teacher_row['name'];
     }
+    
 
-    // Step 6: Insert into schedule
-    $insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, institute_id)
-                     VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$institute_id')";
+  $hall_no = $_POST['hall_no'];
 
-    if (mysqli_query($conn, $insert_query)) {
-        echo "<script>alert('Schedule added successfully!'); window.location.href='schedule.php';</script>";
-    } else {
-        echo "Error: " . mysqli_error($conn);
-    }
+// Step 6: Check for hall conflict
+$conflict_query = "SELECT * FROM schedule 
+    WHERE hallNo = '$hall_no' 
+    AND day = '$day' 
+    AND (
+        (start_time <= '$start_time' AND end_time > '$start_time') OR
+        (start_time < '$end_time' AND end_time >= '$end_time') OR
+        (start_time >= '$start_time' AND end_time <= '$end_time')
+    )";
+
+$conflict_result = mysqli_query($conn, $conflict_query);
+if (mysqli_num_rows($conflict_result) > 0) {
+    echo "<script>alert('This classroom is not available at the selected time.'); window.history.back();</script>";
+    exit();
+}
+
+// Step 7: Insert into schedule
+$insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, institute_id, hallNo)
+                 VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$institute_id', '$hall_no')";
+
+if (mysqli_query($conn, $insert_query)) {
+    echo "<script>alert('Schedule added successfully!'); window.location.href='schedule.php';</script>";
+} else {
+    echo "Error: " . mysqli_error($conn);
+}
+
 }
 
 ?>
@@ -330,7 +350,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <select id="class_and_year" name="class_and_year" required>
     <option value="">-- Select Class and Year --</option>
     <?php
-      $class_query = "SELECT class, year FROM class";
+      // Filter by institute ID
+      $class_query = "SELECT class, year FROM class WHERE institute_id = '$institute_id'";
       $class_result = mysqli_query($conn, $class_query);
       if ($class_result && mysqli_num_rows($class_result) > 0) {
           while ($row = mysqli_fetch_assoc($class_result)) {
@@ -338,10 +359,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               $year = $row['year'];
               echo "<option value='{$class}|{$year}'>Class $class - $year</option>";
           }
+      } else {
+          echo "<option value=''>No classes available</option>";
       }
     ?>
   </select>
 </div>
+
 
 
   <div class="form-row">
@@ -373,6 +397,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <option>Sunday</option>
     </select>
   </div>
+
+  <div class="form-row">
+  <label for="hall_no">Hall No</label>
+  <select id="hall_no" name="hall_no" required>
+    <option value="">Select Hall</option>
+    <?php
+      $hall_query = "SELECT classroom FROM classroom WHERE institute_id = '$institute_id'";
+      $hall_result = mysqli_query($conn, $hall_query);
+      if ($hall_result && mysqli_num_rows($hall_result) > 0) {
+          while ($hall_row = mysqli_fetch_assoc($hall_result)) {
+              echo "<option value='{$hall_row['classroom']}'>{$hall_row['classroom']}</option>";
+          }
+      } else {
+          echo "<option value=''>No halls available</option>";
+      }
+    ?>
+  </select>
+</div>
+
 
   <div class="form-row">
     <label for="start_time">Start Time</label>
@@ -408,6 +451,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           <th>Class & Year</th>
           <th>Subject</th>
           <th>Day</th>
+          <th>Hall No</th>
           <th>Time</th>
           <th>Teacher</th>
           
@@ -441,14 +485,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $day = $row['day'];
             $time = date('H:i', strtotime($row['start_time'])) . ' to ' . date('H:i', strtotime($row['end_time']));
             $teacher = $row['teacher_name'];
-
+          $hall_no = $row['hallNo'];
             echo "<tr>
-                    <td>{$class_year}</td>
-                    <td>{$subject}</td>
-                    <td>{$day}</td>
-                    <td>{$time}</td>
-                    <td>{$teacher}</td>
-                  </tr>";
+        <td>{$class_year}</td>
+        <td>{$subject}</td>
+        <td>{$day}</td>
+        <td>{$hall_no}</td>
+        <td>{$time}</td>
+        <td>{$teacher}</td>
+        
+      </tr>";
         }
     } else {
         echo "<tr><td colspan='5'>No schedule entries found.</td></tr>";

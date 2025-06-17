@@ -1,5 +1,4 @@
 <?php
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -11,10 +10,9 @@ if (!isset($_SESSION['logged_in'])) {
 
 include('db_connect.php'); 
 
-// Get current logged-in user's email
 $user_email = $_SESSION['email'];
 
-// Always fetch and update institute_id for the current logged-in user
+// Get institute_id from users table
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $user_email);
 $stmt->execute();
@@ -27,7 +25,13 @@ if (isset($_GET['subject_id']) && isset($_SESSION['institute_id'])) {
     $subject_id = intval($_GET['subject_id']);
     $institute_id = intval($_SESSION['institute_id']);
 
-    $stmt = $conn->prepare("SELECT teacher_code, name FROM teachers WHERE subject_id = ? AND institute_id = ?");
+    // Use join to fetch teacher info from assigned subjects
+    $stmt = $conn->prepare("
+        SELECT t.teacher_code, t.name 
+        FROM teachers t
+        INNER JOIN assignsubjectstoteacher a ON t.teacher_code = a.teacher_code
+        WHERE a.sub_id = ? AND a.institute_id = ?
+    ");
     $stmt->bind_param("ii", $subject_id, $institute_id);
     $stmt->execute();
     $result = $stmt->get_result();

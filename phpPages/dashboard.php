@@ -228,7 +228,9 @@ if ($actResult && $actResult->num_rows > 0) {
     <a href="#"><i class="fa fa-chart-line"></i> Dashboard</a>
     <a href="manageStudent.php"><i class="fa fa-user-graduate"></i> Manage Students</a>
     <a href="manageTeacher.php"><i class="fa fa-chalkboard-teacher"></i> Manage Teachers</a>
+    <a href="addClassRoom.php"><i class="fas fa-chalkboard"></i> Add Class Room</a>
     <a href="Schedule.php"><i class="fa fa-calendar-alt"></i> Schedule</a>
+    <a href="viewSchedule.php"><i class="fa fa-calendar-check"></i> View Schedule</a>
     <a href="attendance.php"><i class="fa fa-check-square"></i> Attendance</a>
     <a href="#"><i class="fa fa-money-bill-wave"></i> Payments</a>
     <a href="setting.php"><i class="fa fa-cog"></i> Settings</a>

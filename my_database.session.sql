@@ -133,6 +133,17 @@ CREATE TABLE assignSubjects (
         ON UPDATE CASCADE
 );
 
+ALTER TABLE assignSubjects
+ADD COLUMN institute_id INT(11);
+
+
+ALTER TABLE assignSubjects
+ADD CONSTRAINT fk_assignSubjects_institute
+FOREIGN KEY (institute_id) REFERENCES users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+
 CREATE TABLE attendance (
     id INT AUTO_INCREMENT PRIMARY KEY,
     status ENUM('Present', 'Absent') NOT NULL,
@@ -153,6 +164,55 @@ ADD COLUMN attendance_date DATE NOT NULL DEFAULT CURRENT_DATE;
 
 ALTER TABLE attendance ADD COLUMN subject VARCHAR(255) NOT NULL;
 
+CREATE TABLE classroom (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    classroom VARCHAR(100) NOT NULL,
+    description TEXT,
+    institute_id INT NOT NULL,
+    FOREIGN KEY (institute_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE classroom
+ADD CONSTRAINT unique_institute_classroom UNIQUE (institute_id, classroom);
+
+ALTER TABLE schedule
+ADD hallNo VARCHAR(255);
 
 
 
+ALTER TABLE schedule
+ADD CONSTRAINT fk_schedule_hallNo
+FOREIGN KEY (institute_id, hallNo)
+REFERENCES classroom(institute_id, classroom)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+
+
+ALTER TABLE teachers
+DROP FOREIGN KEY teachers_ibfk_3;
+
+ALTER TABLE teachers
+DROP COLUMN subject_id;
+
+
+CREATE TABLE assignSubjectsToTeacher (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    teacher_code VARCHAR(50) NOT NULL,
+    sub_id INT DEFAULT NULL,
+    FOREIGN KEY (teacher_code) REFERENCES teachers(teacher_code)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (sub_id) REFERENCES subjects(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+ALTER TABLE assignSubjectsToTeacher
+ADD COLUMN institute_id INT(11);
+
+
+ALTER TABLE assignSubjectsToTeacher
+ADD CONSTRAINT fk_assignSubjectsToTeacher_institute
+FOREIGN KEY (institute_id) REFERENCES users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;

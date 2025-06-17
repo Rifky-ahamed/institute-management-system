@@ -26,7 +26,7 @@ $stmt->close();
 $subject_result = $conn->query("SELECT id, subject FROM subjects");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $student_code = trim($_POST['student_code']);
+    $teacher_code = trim($_POST['teacher_code']);
     $subjects = $_POST['subjects'] ?? [];
 
     if (empty($subjects)) {
@@ -34,16 +34,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-
-    
-   $stmt = $conn->prepare("SELECT student_code FROM student WHERE stupassword = ? AND institute_id = ?");
-    $stmt->bind_param("si", $student_code, $institute_id);
+    $stmt = $conn->prepare("SELECT teacher_code FROM teachers WHERE teacher_code = ? AND institute_id = ?");
+    $stmt->bind_param("si", $teacher_code, $institute_id);
     $stmt->execute();
     $stmt->bind_result($fetched_code);
     $stmt->fetch();
     $stmt->close();
 
-    if (!$fetched_code) {
+     if (!$fetched_code) {
     echo "<script>alert('Student does not exist in your institute.');</script>";
     exit;
     }
@@ -53,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     foreach ($subjects as $subject_id) {
         // Step 2: Check if already assigned
-        $check = $conn->prepare("SELECT id FROM assignsubjects WHERE student_code = ? AND sub_id = ?");
-        $check->bind_param("sii", $student_code, $subject_id);
+        $check = $conn->prepare("SELECT id FROM assignSubjectsToTeacher WHERE teacher_code = ? AND sub_id = ?");
+        $check->bind_param("si", $teacher_code, $subject_id);
         $check->execute();
         $check->store_result();
 
@@ -62,8 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $skipped++;
         } else {
             // Insert new assignment
-            $insert = $conn->prepare("INSERT INTO assignsubjects (student_code, sub_id, institute_id) VALUES (?, ?, ?)");
-            $insert->bind_param("si", $student_code, $subject_id, $institute_id);
+            $insert = $conn->prepare("INSERT INTO assignSubjectsToTeacher (teacher_code, sub_id, institute_id) VALUES (?, ?, ?)");
+            $insert->bind_param("sii", $teacher_code, $subject_id, $institute_id);
             $insert->execute();
             $inserted++;
             $insert->close();
@@ -74,15 +72,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     echo "<script>alert('Subjects Assigned: $inserted, Skipped (Already Exist): $skipped');</script>";
 }
-?>
 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head> 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Student to Subject - Institute Class Management System</title>
+  <title>Add Teacher to Subject - Institute Class Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
 <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?> 
@@ -234,10 +232,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body>
   <div class="container">
-    <h2><i class="fas fa-user-plus"></i> Add Student to Subject</h2>
+    <h2><i class="fas fa-user-plus"></i> Add Teacher to Subject</h2>
     <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
-      <label for="student_code">Student Code:</label>
-      <input type="text" id="student_code" name="student_code" required />
+      <label for="teacher_code">Teacher Code:</label>
+      <input type="text" id="teacher_code" name="teacher_code" required />
 
       <label>Select Subjects:</label>
       <div class="checkbox-group">

@@ -39,10 +39,11 @@ if (isset($_GET['subject_id']) && isset($_SESSION['institute_id'])) {
     $teachers = [];
 
     while ($row = $result->fetch_assoc()) {
-        $teachers[] = [
-            'id' => $row['teacher_code'],
-            'name' => $row['name']
-        ];
+       $teachers[] = [
+    'id' => $row['teacher_code'],   
+    'name' => $row['name']
+];
+
     }
 
     header('Content-Type: application/json');

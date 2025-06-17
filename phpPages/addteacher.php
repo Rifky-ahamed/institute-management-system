@@ -89,9 +89,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt_class->close();
 
         // Log activity without subject
-        $activity = "Teacher $name registered for class $class_name";
-        $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
-        $stmt_log->bind_param("s", $activity);
+        $activity = "Teacher $name registered for  $class_name";
+        $stmt_log = $conn->prepare("INSERT INTO activity_log (activity, institute_id ) VALUES (?, ?)");
+        $stmt_log->bind_param("si", $activity, $institute_id);
         $stmt_log->execute();
     } else {
         echo "Error: " . $stmt_insert_teacher->error;

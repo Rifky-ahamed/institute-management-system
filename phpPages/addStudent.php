@@ -88,8 +88,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
         // Log activity
         $activity = "Student $name registered for $class";
-        $stmt_log = $conn->prepare("INSERT INTO activity_log (activity) VALUES (?)");
-        $stmt_log->bind_param("s", $activity);
+        $stmt_log = $conn->prepare("INSERT INTO activity_log (activity, institute_id ) VALUES (?, ?)");
+        $stmt_log->bind_param("si", $activity, $institute_id);
         $stmt_log->execute();
 
     } else {

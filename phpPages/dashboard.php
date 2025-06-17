@@ -62,8 +62,20 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $totalSubjects = $row['total_subjects'];
 
+// Get the institute_id of the logged-in user
+$inst_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$inst_stmt->bind_param("s", $user_email);
+$inst_stmt->execute();
+$inst_result = $inst_stmt->get_result();
+$inst_row = $inst_result->fetch_assoc();
+$institute_id = $inst_row['id'];
+
 $activities = [];
-$actResult = $conn->query("SELECT activity FROM activity_log ORDER BY created_at DESC LIMIT 5");
+
+$activity_stmt = $conn->prepare("SELECT activity FROM activity_log WHERE institute_id = ? ORDER BY created_at DESC LIMIT 5");
+$activity_stmt->bind_param("i", $institute_id);
+$activity_stmt->execute();
+$actResult = $activity_stmt->get_result();
 
 if ($actResult && $actResult->num_rows > 0) {
     while ($actRow = $actResult->fetch_assoc()) {

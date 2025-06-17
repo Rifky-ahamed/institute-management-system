@@ -53,6 +53,13 @@ CREATE TABLE activity_log (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE activity_log
+ADD COLUMN institute_id INT(11);
+
+ALTER TABLE activity_log
+ADD CONSTRAINT fk_activitylog_institute
+FOREIGN KEY (institute_id) REFERENCES users(id)
+ON DELETE CASCADE;
 
 
 CREATE TABLE subjects(

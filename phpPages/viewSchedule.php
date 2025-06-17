@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
- 
+
 if (!isset($_SESSION['logged_in'])) {
     header("Location: log.php");
     exit();
@@ -14,12 +14,34 @@ include('db_connect.php');
 $user_email = $_SESSION['email'];
 $theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
 
-
 // Step 1: Get institute_id using email from session
 $institute_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $institute_stmt->bind_param("s", $user_email);
 $institute_stmt->execute();
 $institute_result = $institute_stmt->get_result();
+$institute_row = $institute_result->fetch_assoc();
+$institute_id = $institute_row['id'];
+
+// Step 2: Fetch schedule data
+$schedule_stmt = $conn->prepare("SELECT 
+    schedule.class,
+    schedule.year,
+    subjects.subject AS subject_name,
+    schedule.day,
+    schedule.start_time,
+    schedule.end_time,
+    schedule.teacher_name,
+    schedule.hallNo
+FROM schedule
+JOIN subjects ON schedule.subject = subjects.id
+WHERE schedule.institute_id = ?
+ORDER BY 
+    FIELD(schedule.day, 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+    schedule.start_time");
+
+$schedule_stmt->bind_param("i", $institute_id);
+$schedule_stmt->execute();
+$schedule_result = $schedule_stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -81,6 +103,22 @@ $institute_result = $institute_stmt->get_result();
     tr:hover {
       background-color: #f1f1f1;
     }
+    .edit-btn {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  background-color: #2d6cdf;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+  background-color: #1b4eb3;
+}
+
   </style>
 </head>
 <body>
@@ -92,6 +130,8 @@ $institute_result = $institute_stmt->get_result();
 
   <div class="container">
     <h2>Weekly Class Schedule</h2>
+  <a href="editSchedule.php" class="edit-btn">✏️ Edit Schedule</a>
+
     <table>
       <thead>
         <tr>
@@ -99,37 +139,27 @@ $institute_result = $institute_stmt->get_result();
           <th>Year</th>
           <th>Subject</th>
           <th>Day</th>
+          <th>Hall No</th>
           <th>Time</th>
           <th>Teacher</th>
         </tr>
       </thead>
       <tbody>
-        <!-- Sample Static Data (Replace with PHP if dynamic) -->
-        <tr>
-          <td>Class 10</td>
-          <td>2025</td>
-          <td>Mathematics</td>
-          <td>Monday</td>
-          <td>09:00 - 10:30</td>
-          <td>Mr. John</td>
-        </tr>
-        <tr>
-          <td>Class 10</td>
-          <td>2025</td>
-          <td>Science</td>
-          <td>Wednesday</td>
-          <td>10:45 - 12:15</td>
-          <td>Ms. Sarah</td>
-        </tr>
-        <tr>
-          <td>Class 11</td>
-          <td>2025</td>
-          <td>English</td>
-          <td>Friday</td>
-          <td>08:00 - 09:30</td>
-          <td>Mr. Ahmed</td>
-        </tr>
-        <!-- You can loop your DB data here -->
+        <?php if ($schedule_result->num_rows > 0): ?>
+          <?php while ($row = $schedule_result->fetch_assoc()): ?>
+            <tr>
+              <td><?php echo htmlspecialchars($row['class']); ?></td>
+              <td><?php echo htmlspecialchars($row['year']); ?></td>
+              <td><?php echo htmlspecialchars($row['subject_name']); ?></td>
+              <td><?php echo htmlspecialchars($row['day']); ?></td>
+              <td><?php echo htmlspecialchars($row['hallNo']); ?></td>
+              <td><?php echo date('H:i', strtotime($row['start_time'])) . " - " . date('H:i', strtotime($row['end_time'])); ?></td>
+              <td><?php echo htmlspecialchars($row['teacher_name']); ?></td>
+            </tr>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <tr><td colspan="7">No schedule data available.</td></tr>
+        <?php endif; ?>
       </tbody>
     </table>
   </div>

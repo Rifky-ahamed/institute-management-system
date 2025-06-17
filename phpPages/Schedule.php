@@ -15,23 +15,37 @@ include('db_connect.php');
 $user_email = $_SESSION['email'];
 $theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
 
+// Step 2: Fetch institute ID from users table
+$institute_id = null;
+$institute_query = "SELECT id FROM users WHERE email = '$user_email' LIMIT 1";
+$institute_result = mysqli_query($conn, $institute_query);
+if ($institute_result && mysqli_num_rows($institute_result) > 0) {
+    $row = mysqli_fetch_assoc($institute_result);
+    $institute_id = $row['id'];
+} else {
+    die("Error: Institute not found.");
+}
 
- // Step 2: Fetch institute ID from users table
-    $institute_id = null;
-    $institute_query = "SELECT id FROM users WHERE email = '$user_email' LIMIT 1";
-    $institute_result = mysqli_query($conn, $institute_query);
-    if ($institute_result && mysqli_num_rows($institute_result) > 0) {
-        $row = mysqli_fetch_assoc($institute_result);
-        $institute_id = $row['id'];
-    } else {
-        die("Error: Institute not found.");
-    }
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-   
+
     // Step 3: Extract class and year
     if (isset($_POST['class_and_year'])) {
         list($class_value, $year) = explode('|', $_POST['class_and_year']);
-        $class = 'Class ' . $class_value;
+        // If your class column stores values like "Class 09", uncomment the next line
+        // $class = 'Class ' . $class_value;
+        // Otherwise use directly
+        $class = $class_value;
+    }
+
+    // Get class_id for conflict checking
+    $class_id = null;
+    $class_id_query = "SELECT id FROM class WHERE class = '$class' AND year = '$year' AND institute_id = '$institute_id' LIMIT 1";
+    $class_id_result = mysqli_query($conn, $class_id_query);
+    if ($class_id_result && mysqli_num_rows($class_id_result) > 0) {
+        $class_id_row = mysqli_fetch_assoc($class_id_result);
+        $class_id = $class_id_row['id'];
+    } else {
+        die("Error: Class ID not found for class '$class' and year '$year'.");
     }
 
     // Step 4: Other fields
@@ -49,39 +63,77 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $teacher_row = mysqli_fetch_assoc($teacher_result);
         $teacher_name = $teacher_row['name'];
     }
-    
 
-  $hall_no = $_POST['hall_no'];
+    $hall_no = $_POST['hall_no'];
 
-// Step 6: Check for hall conflict
-$conflict_query = "SELECT * FROM schedule 
-    WHERE hallNo = '$hall_no' 
-    AND day = '$day' 
-    AND (
-        (start_time <= '$start_time' AND end_time > '$start_time') OR
-        (start_time < '$end_time' AND end_time >= '$end_time') OR
-        (start_time >= '$start_time' AND end_time <= '$end_time')
-    )";
+    // Step 6: Check for hall conflict
+    $conflict_query = "SELECT * FROM schedule 
+        WHERE hallNo = '$hall_no' 
+        AND day = '$day' 
+        AND (
+            (start_time <= '$start_time' AND end_time > '$start_time') OR
+            (start_time < '$end_time' AND end_time >= '$end_time') OR
+            (start_time >= '$start_time' AND end_time <= '$end_time')
+        )";
 
-$conflict_result = mysqli_query($conn, $conflict_query);
-if (mysqli_num_rows($conflict_result) > 0) {
-    echo "<script>alert('This classroom is not available at the selected time.'); window.history.back();</script>";
-    exit();
-}
+    $conflict_result = mysqli_query($conn, $conflict_query);
+    if (mysqli_num_rows($conflict_result) > 0) {
+        echo "<script>alert('This classroom is not available at the selected time.'); window.history.back();</script>";
+        exit();
+    }
 
-// Step 7: Insert into schedule
-$insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, institute_id, hallNo)
-                 VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$institute_id', '$hall_no')";
+    // Step 6.2: Check for teacher time conflict
+    $teacher_conflict_query = "SELECT * FROM schedule 
+        WHERE teacher_name = (
+            SELECT name FROM teachers WHERE teacher_code = '$teacher_id'
+        )
+        AND day = '$day'
+        AND (
+            (start_time <= '$start_time' AND end_time > '$start_time') OR
+            (start_time < '$end_time' AND end_time >= '$end_time') OR
+            (start_time >= '$start_time' AND end_time <= '$end_time')
+        )";
 
-if (mysqli_query($conn, $insert_query)) {
-    echo "<script>alert('Schedule added successfully!'); window.location.href='schedule.php';</script>";
-} else {
-    echo "Error: " . mysqli_error($conn);
-}
+    $teacher_conflict_result = mysqli_query($conn, $teacher_conflict_query);
+    if (mysqli_num_rows($teacher_conflict_result) > 0) {
+        echo "<script>alert('This teacher is already scheduled at the selected time.'); window.history.back();</script>";
+        exit();
+    }
 
+    // Step 6.3: Check for class & year conflict
+    $class_conflict_query = "SELECT * FROM schedule 
+        WHERE class = (
+            SELECT class FROM class WHERE id = '$class_id'
+        )
+        AND year = (
+            SELECT year FROM class WHERE id = '$class_id'
+        )
+        AND day = '$day'
+        AND (
+            (start_time <= '$start_time' AND end_time > '$start_time') OR
+            (start_time < '$end_time' AND end_time >= '$end_time') OR
+            (start_time >= '$start_time' AND end_time <= '$end_time')
+        )";
+
+    $class_conflict_result = mysqli_query($conn, $class_conflict_query);
+    if (mysqli_num_rows($class_conflict_result) > 0) {
+        echo "<script>alert('This class already has a scheduled subject during the selected time.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Step 7: Insert into schedule
+    $insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, institute_id, hallNo)
+                     VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$institute_id', '$hall_no')";
+
+    if (mysqli_query($conn, $insert_query)) {
+        echo "<script>alert('Schedule added successfully!'); window.location.href='schedule.php';</script>";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
 }
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -357,7 +409,7 @@ if (mysqli_query($conn, $insert_query)) {
           while ($row = mysqli_fetch_assoc($class_result)) {
               $class = $row['class'];
               $year = $row['year'];
-              echo "<option value='{$class}|{$year}'>Class $class - $year</option>";
+              echo "<option value='{$class}|{$year}'> $class - $year</option>";
           }
       } else {
           echo "<option value=''>No classes available</option>";
@@ -519,7 +571,7 @@ if (mysqli_query($conn, $insert_query)) {
           data.forEach(teacher => {
             const option = document.createElement('option');
             option.value = teacher.id;
-            option.textContent = teacher.name;
+            option.textContent = `${teacher.name} (${teacher.id})`;
             teacherSelect.appendChild(option);
           });
         })

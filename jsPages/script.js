@@ -25,11 +25,7 @@ document.addEventListener("DOMContentLoaded",function(){
             return false ;
         }
 
-        if (!passwordPattern.test(password)) {
-            document.getElementById('password').value = "";
-            document.getElementById('password').placeholder = "Weak password. Use A-Z, a-z, 0-9, and @#$!";
-            return false;
-        }
+       
 
         if(password !== confirmPassword){
             document.getElementById('confirmPassword').value = "";

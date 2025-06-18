@@ -238,3 +238,7 @@ CREATE TABLE payment (
     FOREIGN KEY (institute_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (student_code) REFERENCES student(stupassword) ON DELETE CASCADE
 );
+
+
+ALTER TABLE payment
+ADD COLUMN money DECIMAL(10, 2);

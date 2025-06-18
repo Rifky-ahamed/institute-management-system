@@ -80,8 +80,9 @@ if (isset($_POST['submit_attendance']) && isset($_POST['attendance'])) {
 
     // Prepare statements for checking and updating/inserting
     $check_stmt = $conn->prepare("SELECT id FROM payment WHERE student_code = ? AND institute_id = ? AND class = ? AND year = ? AND month = ? AND subject = ?");
-    $update_stmt = $conn->prepare("UPDATE payment SET status = ? WHERE id = ?");
-    $insert_stmt = $conn->prepare("INSERT INTO payment (status, institute_id, student_code, class, year, month, subject) VALUES (?, ?, ?, ?, ?, ?, ?)");
+   $update_stmt = $conn->prepare("UPDATE payment SET status = ?, money = ? WHERE id = ?");
+    $insert_stmt = $conn->prepare("INSERT INTO payment (status, money, institute_id, student_code, class, year, month, subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
 
     foreach ($_POST['attendance'] as $student_code => $status) {
         // Check if record exists
@@ -93,13 +94,17 @@ if (isset($_POST['submit_attendance']) && isset($_POST['attendance'])) {
             // Record exists, update it
             $row = $check_result->fetch_assoc();
             $payment_id = $row['id'];
-            $update_stmt->bind_param("si", $status, $payment_id);
+            $money = ($status === 'done') ? 2000 : 0;
+            $update_stmt->bind_param("sii", $status, $money, $payment_id);
+
             if (!$update_stmt->execute()) {
                 echo "Error updating payment for student_code $student_code: " . $update_stmt->error;
             }
         } else {
             // Insert new record
-            $insert_stmt->bind_param("sisssss", $status, $institute_id, $student_code, $class_name, $class_year, $monthName, $subject_name);
+           $money = ($status === 'done') ? 2000 : 0;
+            $insert_stmt->bind_param("siisssss", $status, $money, $institute_id, $student_code, $class_name, $class_year, $monthName, $subject_name);
+
             if (!$insert_stmt->execute()) {
                 echo "Error inserting payment for student_code $student_code: " . $insert_stmt->error;
             }

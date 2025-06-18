@@ -166,7 +166,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <a href="student_details.php">🎓 Student Details</a>
     <a href="teachers_details.php">👩‍🏫 Teachers Details</a>
     <a href="generate_report.php">📄 Generate Report</a>
-    <a href="logout.php">🚪 Logout</a>
+    <a href="logout.php" onclick="return confirm('Are you sure you want to logout?')">🚪 Logout</a>
+
   </div>
 
   <div class="main-content">

@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     foreach ($subjects as $subject_id) {
         // Step 2: Check if already assigned
         $check = $conn->prepare("SELECT id FROM assignsubjects WHERE student_code = ? AND sub_id = ?");
-        $check->bind_param("sii", $student_code, $subject_id);
+        $check->bind_param("ii", $student_code, $subject_id);
         $check->execute();
         $check->store_result();
 
@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             // Insert new assignment
             $insert = $conn->prepare("INSERT INTO assignsubjects (student_code, sub_id, institute_id) VALUES (?, ?, ?)");
-            $insert->bind_param("si", $student_code, $subject_id, $institute_id);
+            $insert->bind_param("sii", $student_code, $subject_id, $institute_id);
             $insert->execute();
             $inserted++;
             $insert->close();

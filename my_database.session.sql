@@ -223,3 +223,18 @@ ADD CONSTRAINT fk_assignSubjectsToTeacher_institute
 FOREIGN KEY (institute_id) REFERENCES users(id)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
+
+CREATE TABLE payment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    status ENUM('done', 'not-done') NOT NULL,
+    institute_id INT(11),
+    student_code VARCHAR(255),
+    class VARCHAR(100),
+    year INT,
+    month VARCHAR(20),
+    subject VARCHAR(255),
+
+    -- Foreign Key Constraints
+    FOREIGN KEY (institute_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_code) REFERENCES student(stupassword) ON DELETE CASCADE
+);

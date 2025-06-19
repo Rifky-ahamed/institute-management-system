@@ -122,8 +122,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Step 7: Insert into schedule
-    $insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, institute_id, hallNo)
-                     VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$institute_id', '$hall_no')";
+    $insert_query = "INSERT INTO schedule (class, year, subject, day, start_time, end_time, teacher_name, teacher_code, institute_id, hallNo)
+                 VALUES ('$class', '$year', '$subject', '$day', '$start_time', '$end_time', '$teacher_name', '$teacher_id', '$institute_id', '$hall_no')";
+
 
     if (mysqli_query($conn, $insert_query)) {
         echo "<script>alert('Schedule added successfully!'); window.location.href='schedule.php';</script>";

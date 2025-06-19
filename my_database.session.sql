@@ -185,6 +185,10 @@ ADD CONSTRAINT unique_institute_classroom UNIQUE (institute_id, classroom);
 ALTER TABLE schedule
 ADD hallNo VARCHAR(255);
 
+ALTER TABLE schedule
+ADD COLUMN teacher_code VARCHAR(100),
+ADD CONSTRAINT fk_schedule_teacher
+FOREIGN KEY (teacher_code) REFERENCES teachers(teacher_code);
 
 
 ALTER TABLE schedule
@@ -242,3 +246,33 @@ CREATE TABLE payment (
 
 ALTER TABLE payment
 ADD COLUMN money DECIMAL(10, 2);
+
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    stu_code VARCHAR(100),
+    class VARCHAR(50),
+    year INT,
+    message TEXT,
+    date DATE DEFAULT CURRENT_DATE,
+    time TIME,
+    institute_id INT,
+    teacher_code VARCHAR(100),
+    teacher_name VARCHAR(100),
+
+    -- Foreign Key Constraints with ON DELETE and ON UPDATE CASCADE
+    CONSTRAINT fk_student_code FOREIGN KEY (stu_code)
+        REFERENCES student(stupassword)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_institute_id FOREIGN KEY (institute_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_teacher_code FOREIGN KEY (teacher_code)
+        REFERENCES teachers(teacher_code)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);

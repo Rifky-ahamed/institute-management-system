@@ -1,4 +1,45 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['logged_in'])) {
+    header("Location: log.php");
+    exit();
+}
+
+include('db_connect.php'); 
+
+// Get current logged-in student's email
+$student_email = $_SESSION['email'];
+
+// Step 1: Get the student's institute_id
+$stmt = $conn->prepare("SELECT institute_id FROM student WHERE email = ?");
+$stmt->bind_param("s", $student_email);
+$stmt->execute();
+$stmt->bind_result($institute_id);
+$stmt->fetch();
+$stmt->close();
+
+// Step 2: Get the institute name from users table
+$institute_name = "Your Institute"; // default fallback
+if ($institute_id) {
+    $stmt2 = $conn->prepare("SELECT name FROM users WHERE id = ?");
+    $stmt2->bind_param("i", $institute_id);
+    $stmt2->execute();
+    $stmt2->bind_result($institute_name);
+    $stmt2->fetch();
+    $stmt2->close();
+}
+
+// Step 3: Get the student's name
+$student_name = "Student"; // default fallback
+$stmt3 = $conn->prepare("SELECT name FROM student WHERE email = ?");
+$stmt3->bind_param("s", $student_email);
+$stmt3->execute();
+$stmt3->bind_result($student_name);
+$stmt3->fetch();
+$stmt3->close();
 
 ?>
 
@@ -87,7 +128,7 @@
 <body>
 
 <header>
-    <h1>Welcome, Student</h1>
+    <h1>Welcome, <?php echo htmlspecialchars($student_name); ?></h1>
     <p>Your personalized dashboard</p>
 </header>
 
@@ -123,8 +164,9 @@
 </div>
 
 <footer>
-    &copy; 2025 Your Institute Name. All rights reserved.
+    &copy; 2025 <?php echo htmlspecialchars($institute_name); ?>. All rights reserved.
 </footer>
+
 
 </body>
 </html>

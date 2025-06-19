@@ -105,6 +105,11 @@ $stmt3->close();
             transform: translateY(-5px);
         }
 
+        .card a {
+        text-decoration: none;
+        color: inherit;
+        }   
+
         .card i {
             font-size: 40px;
             color: #4a90e2;
@@ -134,33 +139,41 @@ $stmt3->close();
 
 <nav>
     <a href="#"><i class="fa fa-home"></i> Home</a>
-    <a href="#"><i class="fa fa-book"></i> Subjects</a>
-    <a href="#"><i class="fa fa-calendar-alt"></i> Schedule</a>
-    <a href="#"><i class="fa fa-user"></i> Profile</a>
-    <a href="#"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    <a href="stu_subject.php"><i class="fa fa-book"></i> Subjects</a>
+    <a href="stu_schedule.php"><i class="fa fa-calendar-alt"></i> Schedule</a>
+    <a href="stu_profile.php"><i class="fa fa-user"></i> Profile</a>
+    <a href="logout.php" onclick="return confirm('Are you sure you want to logout?')"><i class="fa fa-sign-out-alt"></i> Logout</a>
 </nav>
 
 <div class="dashboard">
+ <a href="stu_subject.php" style="text-decoration: none; color: inherit;">
     <div class="card">
         <i class="fa fa-book"></i>
         <h3>My Subjects</h3>
         <p>View all assigned subjects</p>
     </div>
+</a>
+<a href="stu_schedule.php" style="text-decoration: none; color: inherit;">
     <div class="card">
         <i class="fa fa-calendar-alt"></i>
         <h3>Class Schedule</h3>
         <p>Check your daily schedule</p>
     </div>
+    </a>
+    <a href="stu_profile.php" style="text-decoration: none; color: inherit;">
     <div class="card">
         <i class="fa fa-user"></i>
         <h3>Profile</h3>
         <p>Update your personal details</p>
     </div>
+     </a>
+    <a href="stu_messages.php" style="text-decoration: none; color: inherit;">
     <div class="card">
         <i class="fa fa-envelope"></i>
         <h3>Messages</h3>
         <p>Communicate with teachers</p>
     </div>
+     </a>
 </div>
 
 <footer>

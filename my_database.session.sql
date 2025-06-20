@@ -276,3 +276,35 @@ CREATE TABLE messages (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
+
+
+CREATE TABLE teac_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    stu_code VARCHAR(100),
+    class VARCHAR(50),
+    year INT,
+    message TEXT,
+    date DATE DEFAULT CURRENT_DATE,
+    time TIME,
+    institute_id INT,
+    teacher_code VARCHAR(100),
+    teacher_name VARCHAR(100),
+
+    -- Foreign Key Constraints with ON DELETE and ON UPDATE CASCADE
+    CONSTRAINT teacmsg_fk_student FOREIGN KEY (stu_code)
+        REFERENCES student(stupassword)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT teacmsg_fk_institute FOREIGN KEY (institute_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT teacmsg_fk_teacher FOREIGN KEY (teacher_code)
+        REFERENCES teachers(teacher_code)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+

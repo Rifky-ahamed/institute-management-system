@@ -558,31 +558,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </table>
   </div>
 <script>
-  document.getElementById('subject').addEventListener('change', function () {
-    const subjectId = this.value;
-    const teacherSelect = document.getElementById('teacher');
+const subjectSelect = document.getElementById('subject');
+const classYearSelect = document.getElementById('class_and_year');
+const teacherSelect = document.getElementById('teacher');
 
-    if (subjectId !== "") {
-      fetch('get_teachers.php?subject_id=' + subjectId)
-        .then(response => response.json())
-        .then(data => {
-          // Clear current options
-          teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
-          
-          data.forEach(teacher => {
-            const option = document.createElement('option');
-            option.value = teacher.id;
-            option.textContent = `${teacher.name} (${teacher.id})`;
-            teacherSelect.appendChild(option);
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching teachers:', error);
+function fetchTeachers() {
+  const subjectId = subjectSelect.value;
+  const classYear = classYearSelect.value;
+
+  // Only fetch if both are selected
+  if (subjectId !== "" && classYear !== "") {
+    // Split class and year
+    const [classValue, year] = classYear.split('|');
+
+    // Build query params
+    const params = new URLSearchParams({
+      subject_id: subjectId,
+      class: classValue,
+      year: year
+    });
+
+    fetch('get_teachers.php?' + params.toString())
+      .then(response => response.json())
+      .then(data => {
+        teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+        data.forEach(teacher => {
+          const option = document.createElement('option');
+          option.value = teacher.id;
+          option.textContent = `${teacher.name} (${teacher.id})`;
+          teacherSelect.appendChild(option);
         });
-    } else {
-      teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
-    }
-  });
+      })
+      .catch(error => {
+        console.error('Error fetching teachers:', error);
+      });
+  } else {
+    teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+  }
+}
+
+// Add event listeners to both selects
+subjectSelect.addEventListener('change', fetchTeachers);
+classYearSelect.addEventListener('change', fetchTeachers);
+
 </script>
 
 </body>

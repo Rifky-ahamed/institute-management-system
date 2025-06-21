@@ -14,6 +14,38 @@ include('db_connect.php');
 $user_email = $_SESSION['email'];
 $theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
 
+// Step 1: Get institute_id using email from session
+$institute_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$institute_stmt->bind_param("s", $user_email);
+$institute_stmt->execute();
+$institute_result = $institute_stmt->get_result();
+
+
+
+if ($institute_result->num_rows > 0) {
+    $institute = $institute_result->fetch_assoc();
+    $institute_id = $institute['id'];
+}
+
+
+
+$currentMonthName = date('F'); // e.g., "June"
+$currentYear = date('Y');
+
+$stmt = $conn->prepare("
+    SELECT SUM(money) AS total_revenue 
+    FROM payment 
+    WHERE month = ? AND YEAR = ? AND institute_id = ?
+");
+$stmt->bind_param("sii", $currentMonthName, $currentYear, $institute_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+
+$monthlyRevenue = $row['total_revenue'] ?? 0;
+
+
+
 $query = "
     SELECT COUNT(*) AS total_students 
     FROM student 
@@ -257,7 +289,9 @@ if ($actResult && $actResult->num_rows > 0) {
       <div class="card"><h3>Total teachers</h3><p><?php echo $totalTeacers; ?></p></div>
       <div class="card"><h3>Total Classes</h3><p><?php echo $totalClasses; ?></p></div>
       <div class="card"><h3>Total Subjects</h3><p><?php echo $totalSubjects; ?></p></div>
-      <div class="card"><h3>Monthly Revenue</h3><p>$12,000.00</p></div>
+     <div class="card"><h3>Monthly Revenue</h3><p>LKR <?php echo number_format($monthlyRevenue, 2); ?></p>
+</div>
+
     </div>
 
     <div class="section">
@@ -270,15 +304,8 @@ if ($actResult && $actResult->num_rows > 0) {
       </div>
     </div>
 
-    <div class="section">
-      <h3>Charts</h3>
-      <div class="chart-placeholder">[Chart Area Placeholder: Use Chart.js or similar]</div>
-    </div>
-
-    <div class="section">
-      <h3>Upcoming Events</h3>
-      <div class="calendar">[Calendar Widget Placeholder]</div>
-    </div>
+  
+  
 
     <div class="section">
   <h3>Recent Activities</h3>
@@ -292,11 +319,7 @@ if ($actResult && $actResult->num_rows > 0) {
 </div>
 
 
-    <div class="section">
-      <h3>Announcements</h3>
-      <div class="announcements">
-        <p><strong>Notice:</strong> Mid-term exams start next week. Timetables updated.</p>
-      </div>
+    
     </div>
   </div>
 </body>

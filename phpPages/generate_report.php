@@ -55,7 +55,13 @@ $headers = ['Class', 'Year', 'Subject', 'Day', 'Time', 'Teacher', 'Hall'];
 $widths = [20, 15, 30, 20, 30, 45, 30];
 $pdf->tableHeader($headers, $widths);
 
-$query = "SELECT class, year, subject, day, start_time, end_time, teacher_name, hallNo FROM schedule WHERE institute_id = ?";
+$query = "
+    SELECT sc.class, sc.year, sb.subject AS subject_name, sc.day, sc.start_time, sc.end_time, sc.teacher_name, sc.hallNo
+    FROM schedule sc
+    JOIN subjects sb ON sc.subject = sb.id
+    WHERE sc.institute_id = ?
+";
+
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $institute_id);
 $stmt->execute();
@@ -63,7 +69,8 @@ $result = $stmt->get_result();
 $fill = false;
 while ($row = $result->fetch_assoc()) {
     $time = "{$row['start_time']} - {$row['end_time']}";
-    $data = [$row['class'], $row['year'], $row['subject'], $row['day'], $time, $row['teacher_name'], $row['hallNo']];
+    $data = [$row['class'], $row['year'], $row['subject_name'], $row['day'], $time, $row['teacher_name'], $row['hallNo']];
+
     $pdf->tableRow($data, $widths, $fill);
     $fill = !$fill;
 }

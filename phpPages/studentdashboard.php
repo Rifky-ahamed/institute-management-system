@@ -41,6 +41,36 @@ $stmt3->bind_result($student_name);
 $stmt3->fetch();
 $stmt3->close();
 
+// Step 4: Get stupassword
+$stmt4 = $conn->prepare("SELECT stupassword FROM student WHERE email = ?");
+$stmt4->bind_param("s", $student_email);
+$stmt4->execute();
+$stmt4->bind_result($stu_code);
+$stmt4->fetch();
+$stmt4->close();
+
+// Step 5: Check attendance for 4 or more records in the same subject (subject stored directly)
+$paymentAlerts = [];
+if ($stu_code) {
+    $stmt5 = $conn->prepare("
+        SELECT subject 
+        FROM attendance 
+        WHERE student_code = ?
+        GROUP BY subject 
+        HAVING COUNT(*) >= 4
+    ");
+    $stmt5->bind_param("s", $stu_code);
+    $stmt5->execute();
+    $result = $stmt5->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $paymentAlerts[] = $row['subject'];
+    }
+
+    $stmt5->close();
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -128,14 +158,36 @@ $stmt3->close();
             color: #555;
             margin-top: 50px;
         }
+
+        .payment-alerts {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    padding: 15px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
     </style>
 </head>
 <body>
+
+
 
 <header>
     <h1>Welcome, <?php echo htmlspecialchars($student_name); ?></h1>
     <p>Your personalized dashboard</p>
 </header>
+<?php if (!empty($paymentAlerts)): ?>
+    <div class="payment-alerts">
+        <?php foreach ($paymentAlerts as $subject): ?>
+            <p>You have attended 4 classes in <strong><?php echo htmlspecialchars($subject); ?></strong>. Please pay for this subject.</p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
 <nav>
     <a href="#"><i class="fa fa-home"></i> Home</a>
